@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from numpy import interp
-
 from cereal import car, arne182
 from selfdrive.config import Conversions as CV
 from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, Buttons
