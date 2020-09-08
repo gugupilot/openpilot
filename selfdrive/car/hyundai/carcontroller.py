@@ -204,7 +204,7 @@ class CarController():
       framestoskip = 10
       if self.stopcontrolupdate:
         speedtospam = self.stopspeed
-      else if self.smartspeedupdate:
+      elif self.smartspeedupdate:
         speedtospam = self.smartspeed
       else:
         speedtospam = self.setspeed
