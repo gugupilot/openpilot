@@ -1,37 +1,34 @@
 from cereal import car, messaging
-from common.realtime import DT_CTRL
 from selfdrive.car import apply_std_steer_torque_limits
+from selfdrive.car.hyundai.carstate import GearShifter
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfa_mfa
 from selfdrive.car.hyundai.values import Buttons, SteerLimitParams, CAR, FEATURES
 from opendbc.can.packer import CANPacker
 from selfdrive.config import Conversions as CV
+from selfdrive.controls.lib.pathplanner import LANE_CHANGE_SPEED_MIN
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 
 def process_hud_alert(enabled, fingerprint, visual_alert, left_lane,
                       right_lane, left_lane_depart, right_lane_depart):
-  sys_warning = (visual_alert == VisualAlert.steerRequired)
 
-  # initialize to no line visible
-  sys_state = 1
-  if left_lane and right_lane or sys_warning:  # HUD alert only display when LKAS status is active
-    if enabled or sys_warning:
+  sys_warning = (visual_alert == VisualAlert.steerRequired)
+  if sys_warning:
+      sys_warning = 4 if fingerprint in [CAR.HYUNDAI_GENESIS, CAR.GENESIS_G90, CAR.GENESIS_G80] else 3
+
+  if enabled or sys_warning:
       sys_state = 3
-    else:
-      sys_state = 4
-  elif left_lane:
-    sys_state = 5
-  elif right_lane:
-    sys_state = 6
+  else:
+      sys_state = 1
 
   # initialize to no warnings
   left_lane_warning = 0
   right_lane_warning = 0
   if left_lane_depart:
-    left_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
+    left_lane_warning = 1 if fingerprint in [CAR.HYUNDAI_GENESIS, CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
   if right_lane_depart:
-    right_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
+    right_lane_warning = 1 if fingerprint in [CAR.HYUNDAI_GENESIS, CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
 
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
@@ -42,7 +39,10 @@ class CarController():
     self.car_fingerprint = CP.carFingerprint
     self.packer = CANPacker(dbc_name)
     self.steer_rate_limited = False
+    self.current_veh_speed = 0
+    self.lfainFingerprint = CP.lfaAvailable
     self.vdiff = 0
+    self.nosccradar = CP.radarOffCan
 
     self.smartspeed = 20.
     self.recordsetspeed = 20.
@@ -56,7 +56,7 @@ class CarController():
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart):
 
-    self.lfa_available = True if self.car_fingerprint in FEATURES["send_lfa_mfa"] else False
+    self.lfa_available = True if self.lfainFingerprint or self.car_fingerprint in FEATURES["send_lfa_mfa"] else False
 
     self.high_steer_allowed = True if self.car_fingerprint in FEATURES["allow_high_steer"] else False
 
@@ -69,7 +69,7 @@ class CarController():
     lkas_active = enabled and ((abs(CS.out.steeringAngle) < 90.) or self.high_steer_allowed)
 
     # fix for Genesis hard fault at low speed
-    if CS.out.vEgo < 16.7 and self.car_fingerprint == CAR.HYUNDAI_GENESIS:
+    if CS.out.vEgo < 55 * CV.KPH_TO_MS and self.car_fingerprint == CAR.HYUNDAI_GENESIS and not CS.mdpsHarness:
       lkas_active = False
 
     if not lkas_active:
@@ -81,21 +81,38 @@ class CarController():
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
 
+    clu11_speed = CS.clu11["CF_Clu_Vanz"]
+    enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
+    if clu11_speed > enabled_speed or not lkas_active or CS.out.gearShifter != GearShifter.drive:
+      enabled_speed = clu11_speed
+    else:
+      if CS.is_set_speed_in_mph:
+        self.current_veh_speed = int( CS.out.vEgo * CV.MS_TO_MPH)
+      else:
+        self.current_veh_speed = int(CS.out.vEgo * CV.MS_TO_KPH)
     can_sends = []
     self.clu11_cnt = frame % 0x10
 
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled,
                                    left_lane, right_lane,
-                                   left_lane_warning, right_lane_warning, self.lfa_available))
+                                   left_lane_warning, right_lane_warning, self.lfa_available, 0))
 
-    if pcm_cancel_cmd:
+    if CS.mdpsHarness: # send lkas11 bus 1 if mdps
+      can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
+                                   CS.lkas11, sys_warning, sys_state, enabled,
+                                   left_lane, right_lane,
+                                   left_lane_warning, right_lane_warning, self.lfa_available, 1))
+
+      can_sends.append(create_clu11(self.packer, frame, CS.mdpsHarness, CS.clu11, Buttons.NONE, enabled_speed, self.clu11_cnt))
+
+    if pcm_cancel_cmd and not self.nosccradar:
       self.vdiff = 0.
-      can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.CANCEL, self.clu11_cnt))
+      can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.CANCEL, self.current_veh_speed, self.clu11_cnt))
     elif CS.out.cruiseState.standstill and CS.vrelative > 0:
       self.vdiff += (CS.vrelative - self.vdiff)
       if self.vdiff > 1. or CS.lead_distance > 8.:
-        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.RES_ACCEL, self.clu11_cnt))
+        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.clu11_cnt))
     else:
       self.vdiff = 0.
 
@@ -137,14 +154,14 @@ class CarController():
 
     if (frame - self.last_button_frame) > framestoskip and self.stopcontrolupdate:
       if self.setspeed > (self.smartspeed * 1.005):
-        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.SET_DECEL, self.button_cnt))
+        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.SET_DECEL, self.current_veh_speed, self.button_cnt))
         print("AUTO SLOW DOWN")
         if CS.cruise_buttons == 1:
           self.button_res_stop += 2
         else:
           self.button_res_stop -= 1
       elif self.setspeed < (self.smartspeed / 1.005):
-        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.RES_ACCEL, self.button_cnt))
+        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed,self.button_cnt))
         print("AUTO SPEED UP")
         if CS.cruise_buttons == 2:
           self.button_set_stop += 2

@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 from cereal import car
 from selfdrive.config import Conversions as CV
-from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS
+from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, Buttons
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
 
+EventName = car.CarEvent.EventName
+ButtonType = car.CarState.ButtonEvent.Type
+
 class CarInterface(CarInterfaceBase):
+  def __init__(self, CP, CarController, CarState):
+    super().__init__(CP, CarController, CarState)
+    self.buttonEvents = []
+    self.cp2 = self.CS.get_can2_parser(CP)
 
   @staticmethod
   def compute_gb(accel, speed):
@@ -17,7 +24,6 @@ class CarInterface(CarInterfaceBase):
 
     ret.carName = "hyundai"
     ret.safetyModel = car.CarParams.SafetyModel.hyundai
-    ret.radarOffCan = True
 
     # Most Hyundai car ports are community features for now
     ret.communityFeature = candidate not in [CAR.SONATA]
@@ -56,8 +62,6 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1999. + STD_CARGO_KG
       ret.wheelbase = 2.90
       ret.steerRatio = 13.75 * 1.15
-      ret.lateralTuning.pid.kiBP = [0., 1., 20.]
-      ret.lateralTuning.pid.kpV = [0.01, 0.04, 0.05]
     elif candidate == CAR.KIA_SORENTO:
       ret.mass = 1985. + STD_CARGO_KG
       ret.wheelbase = 2.78
@@ -156,9 +160,26 @@ class CarInterface(CarInterfaceBase):
       ret.steerRateCost = 0.4
 
     # these cars require a special panda safety mode due to missing counters and checksums in the messages
-    if candidate in [ CAR.HYUNDAI_GENESIS, CAR.IONIQ_EV_LTD, CAR.IONIQ_HEV, CAR.KONA_EV, CAR.KIA_SORENTO, CAR.SONATA_2019, 
-                     CAR.KIA_OPTIMA, CAR.VELOSTER, CAR.KIA_STINGER, CAR.GENESIS_G70, CAR.SONATA_HEV, CAR.SANTA_FE, CAR.GENESIS_G90]:
+
+    ret.radarOffCan = 1057 not in fingerprint[0]
+    ret.mdpsHarness = True if 593 in fingerprint[1] and 1296 not in fingerprint[1] else False
+    ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
+    ret.fcaAvailable = True if 909 in fingerprint[0] or 909 in fingerprint[2] else False
+    ret.bsmAvailable = True if 1419 in fingerprint[0] else False
+    ret.lfaAvailable = True if 1157 in fingerprint[0] else False
+
+    if candidate in [ CAR.HYUNDAI_GENESIS, CAR.IONIQ_EV_LTD, CAR.IONIQ_HEV, CAR.KONA_EV, CAR.KIA_SORENTO, CAR.SONATA_2019,
+                      CAR.KIA_OPTIMA, CAR.VELOSTER, CAR.KIA_STINGER, CAR.GENESIS_G70, CAR.SONATA_HEV, CAR.SANTA_FE, CAR.GENESIS_G80,
+                      CAR.GENESIS_G90]:
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiLegacy
+
+    if ret.mdpsHarness:
+      ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
+    if ret.radarOffCan:
+      ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunityNonscc
+
+    if ret.mdpsHarness:
+      ret.minSteerSpeed = 0.
 
     ret.centerToFront = ret.wheelbase * 0.4
 
@@ -172,19 +193,18 @@ class CarInterface(CarInterfaceBase):
                                                                          tire_stiffness_factor=tire_stiffness_factor)
 
     ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
-    ret.autoLcaEnabled = True
 
     return ret
 
   def update(self, c, can_strings):
     self.cp.update_strings(can_strings)
+    self.cp2.update_strings(can_strings)
     self.cp_cam.update_strings(can_strings)
 
-    ret = self.CS.update(self.cp, self.cp_cam)
-    ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
+    ret = self.CS.update(self.cp, self.cp2, self.cp_cam)
+    ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
 
     events = self.create_common_events(ret)
-    #TODO: addd abs(self.CS.angle_steers) > 90 to 'steerTempUnavailable' event
 
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
     if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
@@ -193,6 +213,45 @@ class CarInterface(CarInterfaceBase):
       self.low_speed_alert = False
     if self.low_speed_alert:
       events.add(car.CarEvent.EventName.belowSteerSpeed)
+
+    buttonEvents = []
+    if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
+      be = car.CarState.ButtonEvent.new_message()
+      be.pressed = self.CS.cruise_buttons != 0 
+      but = self.CS.cruise_buttons
+      if but == Buttons.RES_ACCEL:
+        be.type = ButtonType.accelCruise
+      elif but == Buttons.SET_DECEL:
+        be.type = ButtonType.decelCruise
+      elif but == Buttons.GAP_DIST:
+        be.type = ButtonType.gapAdjustCruise
+      elif but == Buttons.CANCEL:
+        be.type = ButtonType.cancel
+      else:
+        be.type = ButtonType.unknown
+      buttonEvents.append(be)
+      self.buttonEvents = buttonEvents
+
+    if self.CS.cruise_main_button != self.CS.prev_cruise_main_button:
+      be = car.CarState.ButtonEvent.new_message()
+      be.type = ButtonType.altButton3
+      be.pressed = bool(self.CS.cruise_main_button)
+      buttonEvents.append(be)
+      self.buttonEvents = buttonEvents
+
+    ret.buttonEvents = self.buttonEvents
+
+    # handle button press
+    for b in self.buttonEvents:
+      if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and b.pressed \
+              and not ret.brakePressed and self.CC.nosccradar:
+        events.add(EventName.buttonEnable)
+      if b.type == ButtonType.cancel and b.pressed:
+        events.add(EventName.buttonCancel)
+      if b.type == ButtonType.altButton3 and b.pressed:
+        events.add(EventName.pcmDisable)
+    if EventName.pcmDisable in events.events:
+      events.events.remove(EventName.pcmDisable)
 
     ret.events = events.to_msg()
 
