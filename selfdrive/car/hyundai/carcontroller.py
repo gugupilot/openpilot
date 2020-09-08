@@ -52,6 +52,8 @@ class CarController():
     self.steer_rate_limited = False
     self.current_veh_speed = 0
     self.lfainFingerprint = CP.lfaAvailable
+    self.last_button_frame = 0
+    self.button_cnt = 0
     self.vdiff = 0
     self.nosccradar = CP.radarOffCan
 
