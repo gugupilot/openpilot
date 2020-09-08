@@ -75,6 +75,7 @@ def create_clu11(packer, frame, bus, clu11, button, speed, cnt):
     values["CF_Clu_AliveCnt1"] = cnt
   return packer.make_can_msg("CLU11", bus, values)
 
+
 def create_lfa_mfa(packer, frame, enabled):
   values = {
     "ACTIVE": enabled,

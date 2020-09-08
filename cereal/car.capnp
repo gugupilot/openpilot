@@ -416,11 +416,11 @@ struct CarParams {
   communityFeature @46: Bool;  # true if a community maintained feature is detected
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
-  mdpsBus @51: Int8;
+  mdpsHarness @51: Bool;
   sasBus @52: Int8;
-  sccBus @53: Int8;
-  autoLcaEnabled @54: Bool;
-  steermaxLimit @55: Float32;
+  fcaAvailable @53: Bool;
+  bsmAvailable @54: Bool;
+  lfaAvailable @55: Bool;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
@@ -495,6 +495,7 @@ struct CarParams {
     subaruLegacy @22;  # pre-Global platform
     hyundaiLegacy @23;
     hyundaiCommunity @24;
+    hyundaiCommunityNonscc @25;
   }
 
   enum SteerControlType {

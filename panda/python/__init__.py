@@ -10,7 +10,6 @@ import traceback
 import subprocess
 import sys
 from .dfu import PandaDFU  # pylint: disable=import-error
-from .esptool import ESPROM, CesantaFlasher  # noqa pylint: disable=import-error
 from .flash_release import flash_release  # noqa pylint: disable=import-error
 from .update import ensure_st_up_to_date  # noqa pylint: disable=import-error
 from .serial import PandaSerial  # noqa pylint: disable=import-error
@@ -129,6 +128,8 @@ class Panda(object):
   SAFETY_VOLKSWAGEN_PQ = 21
   SAFETY_SUBARU_LEGACY = 22
   SAFETY_HYUNDAI_LEGACY = 23
+  SAFETY_HYUNDAI_COMMUNITY = 24
+  SAFETY_HYUNDAI_COMMUNITY_NONSCC = 25
 
   SERIAL_DEBUG = 0
   SERIAL_ESP = 1
