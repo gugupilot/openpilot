@@ -26,6 +26,9 @@ class CarState(CarStateBase):
 
     self.prev_cruise_buttons = self.cruise_buttons
     self.prev_cruise_main_button = self.cruise_main_button
+    self.lead_distance = 150.
+    self.vrelative = 0.
+    self.radar_obj_valid = 0.
 
     ret = car.CarState.new_message()
 
@@ -68,6 +71,7 @@ class CarState(CarStateBase):
       ret.cruiseState.standstill = cp.vl["SCC11"]['SCCInfoDisplay'] == 4.
       self.lead_distance = cp.vl["SCC11"]['ACC_ObjDist']
       self.vrelative = cp.vl["SCC11"]['ACC_ObjRelSpd']
+      self.radar_obj_valid = cp.vl["SCC11"]['ACC_ObjStatus']
 
 
     self.is_set_speed_in_mph = int(cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"])
@@ -232,6 +236,7 @@ class CarState(CarStateBase):
         ("MainMode_ACC", "SCC11", 0),
         ("VSetDis", "SCC11", 0),
         ("SCCInfoDisplay", "SCC11", 0),
+        ("ACC_ObjStatus", "SCC11", 0),
         ("ACC_ObjDist", "SCC11", 0),
         ("ACC_ObjRelSpd", "SCC11", 0),
         ("ACCMode", "SCC12", 1),
