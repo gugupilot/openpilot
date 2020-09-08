@@ -70,7 +70,7 @@ class CarController():
     self.curvature_factor = 1.
 
     if not travis:
-      self.sm = messaging.SubMaster(['liveMapData'])
+      self.sm = messaging.SubMaster(['liveMapData'], ['radarState'])
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart):
