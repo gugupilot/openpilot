@@ -115,9 +115,6 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     preKeepHandsOnWheel @90;
     promptKeepHandsOnWheel @91;
     keepHandsOnWheel @92;
-    deviceFalling @93;
-    opLongdisabled @94;
-    lkasButtonOff @95;
   }
 }
 
@@ -127,6 +124,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
 struct CarState {
   errorsDEPRECATED @0 :List(CarEvent.EventName);
   events @13 :List(CarEvent);
+
   # car speed
   vEgo @1 :Float32;         # best estimate of speed
   aEgo @16 :Float32;        # best estimate of acceleration
@@ -429,6 +427,8 @@ struct CarParams {
     kf @4 :Float32;
     kfV @5 :List(Float32);
     kfBP @6 :List(Float32);
+    kdBP @7 :List(Float32);
+    kdV @8 :List(Float32);
   }
 
   struct LongitudinalPIDTuning {

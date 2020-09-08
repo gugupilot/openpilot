@@ -9,6 +9,7 @@ from common.op_params import opParams
 
 op_params = opParams()
 spairrowtuning = op_params.get('spairrowtuning')
+corolla_tss2_d_tuning = op_params.get('corolla_tss2_d_tuning')
 
 GearShifter = car.CarState.GearShifter
 
@@ -48,6 +49,7 @@ class CarInterface(CarInterfaceBase):
     if candidate not in [CAR.PRIUS_2019, CAR.PRIUS, CAR.RAV4, CAR.RAV4H, CAR.COROLLA]: # These cars use LQR/INDI
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kfBP = [[0.], [0.], [0.]]
+      ret.lateralTuning.pid.kdBP, ret.lateralTuning.pid.kdV = [[0.], [0.]]
 
     if candidate in [CAR.PRIUS, CAR.PRIUS_2019]:
       stop_and_go = True
@@ -270,6 +272,13 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.outerLoopGain = 15.0
         ret.lateralTuning.indi.timeConstant = 5.5
         ret.lateralTuning.indi.actuatorEffectiveness = 6.0
+
+      if corolla_tss2_d_tuning:
+        ret.steerActuatorDelay = 0.40
+        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
+        ret.lateralTuning.pid.kdBP = [0.]
+        ret.lateralTuning.pid.kdV = [9.0]
+        ret.lateralTuning.pid.kf = 0.00007818594
 
     elif candidate in [CAR.LEXUS_ES_TSS2, CAR.LEXUS_ESH_TSS2]:
       stop_and_go = True

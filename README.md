@@ -16,7 +16,7 @@ or if you want to use the command line or https://github.com/jfrux/workbench
 #### Troubleshooting
 Arnepilot has comma logger disabled. This gives a 35% more cpu but at cost of giving [connection error](https://cdn.discordapp.com/attachments/538741329799413760/743231854764884067/image0.jpg)
 
-If you get the [no vehicle](https://cdn.discordapp.com/attachments/538741329799413760/743231854764884067/image0.jpg) after installing Arnepilot please reboot your device. If this still doesn't fix the problem look below at panda flashing and run the command. This is a known issue with comma2 users.
+If you get the [no vehicle](https://cdn.discordapp.com/attachments/538741329799413760/743231854764884067/image0.jpg) after installing Arnepilot completely power cycle your device. If this still doesn't fix the problem look below at panda flashing and run the command. This is a known issue with comma2 users.
 
 ## Panda flashing
 

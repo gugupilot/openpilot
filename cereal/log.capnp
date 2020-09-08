@@ -449,14 +449,12 @@ struct LiveCalibrationData {
   calStatus @1 :Int8;
   calCycle @2 :Int32;
   calPerc @3 :Int8;
-  validBlocks @9 :Int32;
 
   # view_frame_from_road_frame
   # ui's is inversed needs new
   extrinsicMatrix @4 :List(Float32);
   # the direction of travel vector in device frame
   rpyCalib @7 :List(Float32);
-  rpyCalibSpread @8 :List(Float32);
 }
 
 struct LiveTracks {
@@ -868,7 +866,6 @@ struct LiveLocationKalman {
   posenetOK @18 :Bool = true;
   gpsOK @19 :Bool = true;
   sensorsOK @21 :Bool = true;
-  deviceStable @22 :Bool = true;
 
   enum Status {
     uninitialized @0;
