@@ -205,7 +205,7 @@ def radard_thread(sm=None, pm=None, can_sock=None):
   rk = Ratekeeper(1.0 / CP.radarTimeStep, print_delay_threshold=None)
   RD = RadarD(CP.radarTimeStep, RI.delay)
 
-  enable_lead = CP.openpilotLongitudinalControl
+  enable_lead = True #CP.openpilotLongitudinalControl
 
   while 1:
     can_strings = messaging.drain_sock_raw(can_sock, wait_for_one=True)
