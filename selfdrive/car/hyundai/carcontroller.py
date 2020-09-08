@@ -59,9 +59,11 @@ class CarController():
 
     self.sm = 0
     self.smartspeed = 0
+    self.recordsetspeed = 20.
     self.setspeed = 0
     self.smartspeed_old = 0
     self.smartspeedupdate = False
+    self.stopcontrolupdate = False
     self.fixed_offset = 0
     self.button_res_stop = self.button_set_stop = 0
 
@@ -142,8 +144,30 @@ class CarController():
     if not travis:
       self.sm.update(0)
       op_params = opParams()
+      dat = self.sm['radarState'].leadOne
 
       speed_unit = CV.MS_TO_MPH if CS.is_set_speed_in_mph else CV.MS_TO_KPH
+      self.setspeed = CS.out.cruiseState.speed * speed_unit
+
+      if not CS.radar_obj_valid and dat.status and dat.vLead < 3. \
+              and  CS.out.cruiseState.enabled and not CS.out.gasPressed:
+        aRel = (dat.vLead**2 - CS.out.vEgo**2)/(2 * dat.dRel)
+        print("aRel", aRel)
+        if aRel < -.5 or self.stopcontrolupdate:
+          self.stopcontrolupdate = True
+          print("STOPPED VEHICLE")
+          self.stopspeed = 20 if CS.is_set_speed_in_mph else 30
+          if not self.stopcontrolupdate:
+            self.button_cnt = 0
+            self.recordsetspeed = self.setspeed
+      else:
+        if self.setspeed != self.recordsetspeed and self.stopcontrolupdate and  CS.out.cruiseState.enabled \
+                and CS.radar_obj_valid and not CS.out.gasPressed:
+          self.stopspeed = self.recordsetspeed
+        else:
+          self.stopcontrolupdate = False
+          self.recordsetspeed = 0
+
 
       if self.sm['liveMapData'].distToTurn < 350:
         self.curvature_factor = op_params.get('curvature_factor')
@@ -167,7 +191,6 @@ class CarController():
         self.smartspeed = max(self.smartspeed + int(self.fixed_offset), 20) if CS.is_set_speed_in_mph else \
                           max(self.smartspeed + int(self.fixed_offset), 30)
         self.smartspeed = min(self.smartspeed, max(self.smartspeed - 1.5 * self.fixed_offset, v_curvature_map))
-        self.setspeed = CS.out.cruiseState.speed * speed_unit
 
         if self.smartspeed_old != self.smartspeed:
           self.smartspeedupdate = True
@@ -179,15 +202,21 @@ class CarController():
         self.smartspeedupdate = False
 
       framestoskip = 10
+      if self.stopcontrolupdate:
+        speedtospam = self.stopspeed
+      else if self.smartspeedupdate:
+        speedtospam = self.smartspeed
+      else:
+        speedtospam = self.setspeed
 
-      if (frame - self.last_button_frame) > framestoskip and self.smartspeedupdate:
-        if (self.setspeed > (self.smartspeed * 1.005)) and (CS.cruise_buttons != 4):
+      if (frame - self.last_button_frame) > framestoskip and (self.smartspeedupdate or self.stopcontrolupdate):
+        if (self.setspeed > (speedtospam * 1.005)) and (CS.cruise_buttons != 4):
           can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.SET_DECEL, self.current_veh_speed, self.button_cnt))
           if CS.cruise_buttons == 1:
              self.button_res_stop += 2
           else:
              self.button_res_stop -= 1
-        elif (self.setspeed < (self.smartspeed / 1.005)) and (CS.cruise_buttons != 4):
+        elif (self.setspeed < (speedtospam / 1.005)) and (CS.cruise_buttons != 4):
           can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.button_cnt))
           if CS.cruise_buttons == 2:
              self.button_set_stop += 2
@@ -196,8 +225,9 @@ class CarController():
         else:
           self.button_res_stop = self.button_set_stop = 0
 
-        if (abs(self.smartspeed - self.setspeed) < 0.5) or (self.button_res_stop >= 50) or (self.button_set_stop >= 50):
+        if (abs(speedtospam - self.setspeed) < 0.5) or (self.button_res_stop >= 50) or (self.button_set_stop >= 50):
           self.smartspeedupdate = False
+          self.stopcontrolupdate = False
 
         self.button_cnt += 1
         if self.button_cnt > 5:
