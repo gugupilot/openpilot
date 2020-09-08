@@ -60,7 +60,6 @@ class CarController():
     self.sm = 0
     self.smartspeed = 0
     self.setspeed = 0
-    self.currentspeed = 0
     self.smartspeed_old = 0
     self.smartspeedupdate = False
     self.fixed_offset = 0
@@ -105,7 +104,7 @@ class CarController():
       enabled_speed = clu11_speed
     else:
       if CS.is_set_speed_in_mph:
-        self.current_veh_speed = int( CS.out.vEgo * CV.MS_TO_MPH)
+        self.current_veh_speed = int(CS.out.vEgo * CV.MS_TO_MPH)
       else:
         self.current_veh_speed = int(CS.out.vEgo * CV.MS_TO_KPH)
     can_sends = []
@@ -183,13 +182,13 @@ class CarController():
 
       if (frame - self.last_button_frame) > framestoskip and self.smartspeedupdate:
         if (self.setspeed > (self.smartspeed * 1.005)) and (CS.cruise_buttons != 4):
-          can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.SET_DECEL, self.currentspeed, self.button_cnt))
+          can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.SET_DECEL, self.current_veh_speed, self.button_cnt))
           if CS.cruise_buttons == 1:
              self.button_res_stop += 2
           else:
              self.button_res_stop -= 1
         elif (self.setspeed < (self.smartspeed / 1.005)) and (CS.cruise_buttons != 4):
-          can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.RES_ACCEL, self.currentspeed, self.button_cnt))
+          can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.button_cnt))
           if CS.cruise_buttons == 2:
              self.button_set_stop += 2
           else:
