@@ -1388,7 +1388,7 @@ void ui_nvg_init(UIState *s) {
   //dev ui
   s->img_brake = nvgCreateImage(s->vg, "../assets/img_brake_disc.png", 1);
   assert(s->img_brake != 0);
-  s->img_speed = nvgCreateImage(s->vg, "../assets/img_trafficSign_speedahead.png", 1);
+  s->img_speed = nvgCreateImage(s->vg, "../assets/img_trafficSign_stop.png", 1);
   assert(s->img_speed != 0);
 
   for(int i=0;i<=5;++i) {
