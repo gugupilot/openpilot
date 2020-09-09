@@ -71,8 +71,8 @@ class CarState(CarStateBase):
       ret.cruiseState.enabled = cp.vl["SCC12"]['ACCMode'] != 0
       ret.cruiseState.standstill = cp.vl["SCC11"]['SCCInfoDisplay'] == 4.
       self.lead_distance = cp.vl["SCC11"]['ACC_ObjDist']
-      self.radar_obj_valid = cp.vl["SCC11"]['ACC_ObjStatus']
       self.vrelative = cp.vl["SCC11"]['ACC_ObjRelSpd']
+      self.radar_obj_valid = cp.vl["SCC11"]['ACC_ObjStatus']
 
 
     self.is_set_speed_in_mph = int(cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"])
