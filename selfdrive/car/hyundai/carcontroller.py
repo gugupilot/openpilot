@@ -2,6 +2,7 @@ from numpy import math
 
 from cereal import car, messaging
 from common.op_params import opParams
+from common.params import Params
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.carstate import GearShifter
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfa_mfa
@@ -61,6 +62,8 @@ class CarController():
     self.button_res_stop = self.button_set_stop = 0
 
     self.curvature_factor = 1.
+
+    self.params = Params()
 
     if not travis:
       self.sm = messaging.SubMaster(['liveMapData', 'radarState'])
@@ -179,7 +182,7 @@ class CarController():
 
       if self.sm['liveMapData'].speedLimitValid and enabled and CS.out.cruiseState.enabled and op_params.get('smart_speed'):
         self.smartspeed = self.sm['liveMapData'].speedLimit * speed_unit
-        self.fixed_offset = op_params.get('speed_offset')
+        self.fixed_offset = int(self.params.get("SpeedLimitOffset", encoding='utf8'))
         print("sp offset", self.fixed_offset)
         self.smartspeed = max(self.smartspeed + int(self.fixed_offset), 20) if CS.is_set_speed_in_mph else \
                           max(self.smartspeed + int(self.fixed_offset), 30)

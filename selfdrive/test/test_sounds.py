@@ -20,7 +20,7 @@ SOUNDS = {
   AudibleAlert.chimeWarning1: 80,
   AudibleAlert.chimeWarning2: 107,
   AudibleAlert.chimeWarningRepeat: 134,
-  AudibleAlert.chimeWarning2Repeat: 177,
+  AudibleAlert.chimeWarning2Repeat: 134,
   AudibleAlert.chimeAlcStart: 80,
 }
 

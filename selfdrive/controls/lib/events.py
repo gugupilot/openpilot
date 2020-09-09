@@ -547,7 +547,7 @@ EVENTS = {
       "Changing Lane",
       "Monitor Other Vehicles",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeAlcStart, .0, .1, 1.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeAlcStart, .0, .1, 3.),
   },
 
   EventName.steerSaturated: {
