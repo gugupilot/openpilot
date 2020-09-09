@@ -168,6 +168,7 @@ class CarController():
         self.smartspeed = max(self.smartspeed, 20) if CS.is_set_speed_in_mph else \
                           max(self.smartspeed, 30)
 
+        print("speed ahead  +++++++++++++++++++++++++++++++++++",self.sm['liveMapData'].speedLimitAhead)
         if self.smartspeed_old != self.smartspeed:
           self.smartspeedupdate = True
           print("new smart speed------------------", self.smartspeed)
