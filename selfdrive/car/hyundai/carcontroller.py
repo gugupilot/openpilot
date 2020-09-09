@@ -106,15 +106,15 @@ class CarController():
                                    left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, self.lfa_available, 1))
 
-      can_sends.append(create_clu11(self.packer, frame, CS.mdpsHarness, CS.clu11, Buttons.NONE, enabled_speed, self.clu11_cnt))
+      can_sends.append(create_clu11(self.packer, frame, 1, CS.clu11, Buttons.NONE, enabled_speed, self.clu11_cnt))
 
     if pcm_cancel_cmd and not self.nosccradar:
       self.vdiff = 0.
-      can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.CANCEL, self.current_veh_speed, self.clu11_cnt))
+      can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.CANCEL, self.current_veh_speed, self.clu11_cnt))
     elif CS.out.cruiseState.standstill and CS.vrelative > 0:
       self.vdiff += (CS.vrelative - self.vdiff)
       if self.vdiff > 1. or CS.lead_distance > 8.:
-        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.clu11_cnt))
+        can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.clu11_cnt))
     else:
       self.vdiff = 0.
 
@@ -156,14 +156,14 @@ class CarController():
 
     if (frame - self.last_button_frame) > framestoskip and self.stopcontrolupdate:
       if self.setspeed > (self.smartspeed * 1.005):
-        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.SET_DECEL, self.current_veh_speed, self.button_cnt))
+        can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.SET_DECEL, self.current_veh_speed, self.button_cnt))
         print("AUTO SLOW DOWN")
         if CS.cruise_buttons == 1:
           self.button_res_stop += 2
         else:
           self.button_res_stop -= 1
       elif self.setspeed < (self.smartspeed / 1.005):
-        can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed,self.button_cnt))
+        can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed,self.button_cnt))
         print("AUTO SPEED UP")
         if CS.cruise_buttons == 2:
           self.button_set_stop += 2
