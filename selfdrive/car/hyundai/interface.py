@@ -29,6 +29,7 @@ class CarInterface(CarInterfaceBase):
     # Most Hyundai car ports are community features for now
     ret.communityFeature = candidate not in [CAR.SONATA]
 
+    ret.openpilotLongitudinalControl = True
     ret.steerActuatorDelay = 0.4  # Default delay
     ret.steerRateCost = 0.45
     ret.steerLimitTimer = 0.8
