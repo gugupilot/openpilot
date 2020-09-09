@@ -87,9 +87,9 @@ class opParams:
                         'spairrowtuning': Param(False, bool, 'INDI Tuning for Corolla'),
                         'speed_offset': Param(0, VT.number, 'Speed limit offset in m/s', live=True),
                         'traffic_light_alerts': Param(True, bool, "Switch off the traffic light alerts"),
-                        'traffic_lights': Param(False, bool, "Should Openpilot stop for traffic lights"),
-                        'traffic_lights_without_direction': Param(False, bool, "Should Openpilot stop for traffic lights without a direction specified"),
-                        'use_car_caching': Param(True, bool, 'Whether to use fingerprint caching'),
+                        'traffic_lights': Param(True, bool, "Should Openpilot stop for traffic lights"),
+                        'traffic_lights_without_direction': Param(True, bool, "Should Openpilot stop for traffic lights without a direction specified"),
+                        'use_car_caching': Param(False, bool, 'Whether to use fingerprint caching'),
                         'min_TR': Param(None, VT.none_or_number, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
                                                                  'The range is limited from 0.85 to 1.3. Set to None to disable', live=True),
                         'use_virtual_middle_line': Param(False, bool, 'For roads over 4m wide, hug right. For roads under 2m wide, hug left.'),
