@@ -763,6 +763,7 @@ struct Plan {
   mapValid @25 :Bool;
   radarValid @28 :Bool;
   radarCanError @30 :Bool;
+  vCruiseMapd @31 :Float32;
 
   processingDelay @29 :Float32;
 

@@ -66,7 +66,7 @@ class CarController():
     self.params = Params()
 
     if not travis:
-      self.sm = messaging.SubMaster(['liveMapData', 'radarState'])
+      self.sm = messaging.SubMaster(['liveMapData', 'plan', 'radarState'])
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart):
@@ -164,29 +164,12 @@ class CarController():
           self.stopcontrolupdate = False
           self.recordsetspeed = 0
 
-
-      if self.sm['liveMapData'].distToTurn < 350:
-        self.curvature_factor = op_params.get('curvature_factor')
-
-        curvature = abs(self.sm['liveMapData'].curvature)
-        radius = 1 / max(1e-4, curvature) * self.curvature_factor
-        if radius > 500:
-          c = 0.9  # 0.9 at 1000m = 108 kph
-        elif radius > 250:
-          c = 3.5 - 13 / 2500 * radius  # 2.2 at 250m 84 kph
-        else:
-          c = 3.0 - 2 / 625 * radius  # 3.0 at 15m 24 kph
-        v_curvature_map = math.sqrt(c * radius) * speed_unit
-      else:
-        v_curvature_map = 250
-
       if self.sm['liveMapData'].speedLimitValid and enabled and CS.out.cruiseState.enabled and op_params.get('smart_speed'):
-        self.smartspeed = self.sm['liveMapData'].speedLimit * speed_unit
+        self.smartspeed = self.sm['plan'].vCruiseMapd * speed_unit #self.sm['liveMapData'].speedLimit * speed_unit
+        print("smart speed", self.smartspeed)
         self.fixed_offset = int(self.params.get("SpeedLimitOffset", encoding='utf8'))
-        print("sp offset", self.fixed_offset)
         self.smartspeed = max(self.smartspeed + int(self.fixed_offset), 20) if CS.is_set_speed_in_mph else \
                           max(self.smartspeed + int(self.fixed_offset), 30)
-        self.smartspeed = min(self.smartspeed, max(self.smartspeed - 1.5 * self.fixed_offset, v_curvature_map))
 
         if self.smartspeed_old != self.smartspeed:
           self.smartspeedupdate = True

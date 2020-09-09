@@ -317,6 +317,7 @@ class Planner():
         v_speedlimit_ahead = v_ego
 
       v_cruise_setpoint = min([v_cruise_setpoint, v_curvature_map, v_speedlimit, v_speedlimit_ahead])
+      v_cruise_mapd = min([v_curvature_map, v_speedlimit, v_speedlimit_ahead])
       #if (self.mpc1.prev_lead_status and self.mpc1.v_mpc < v_ego*0.99) or (self.mpc2.prev_lead_status and self.mpc2.v_mpc < v_ego*0.99):
       #  v_cruise_setpoint = v_ego
 
@@ -394,6 +395,7 @@ class Planner():
 
     plan_send.plan.vCurvature = float(v_curvature_map)
     plan_send.plan.decelForTurn = bool(decel_for_turn)
+    plan_send.plan.vCruiseMapd = float(v_cruise_mapd)
     plan_send.plan.mapValid = True
 
     radar_valid = not (radar_dead or radar_fault)
