@@ -180,6 +180,7 @@ class CarController():
       if self.sm['liveMapData'].speedLimitValid and enabled and CS.out.cruiseState.enabled and op_params.get('smart_speed'):
         self.smartspeed = self.sm['liveMapData'].speedLimit * speed_unit
         self.fixed_offset = op_params.get('speed_offset')
+        print("sp offset", self.fixed_offset)
         self.smartspeed = max(self.smartspeed + int(self.fixed_offset), 20) if CS.is_set_speed_in_mph else \
                           max(self.smartspeed + int(self.fixed_offset), 30)
         self.smartspeed = min(self.smartspeed, max(self.smartspeed - 1.5 * self.fixed_offset, v_curvature_map))
