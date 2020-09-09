@@ -13,15 +13,15 @@ AudibleAlert = car.CarControl.HUDControl.AudibleAlert
 SOUNDS = {
   # sound: total writes
   AudibleAlert.none: 0,
-  AudibleAlert.chimeEngage: 85,
+  AudibleAlert.chimeEngage: 50,
   AudibleAlert.chimeDisengage: 85,
   AudibleAlert.chimeError: 85,
   AudibleAlert.chimePrompt: 85,
   AudibleAlert.chimeWarning1: 80,
   AudibleAlert.chimeWarning2: 107,
-  AudibleAlert.chimeWarningRepeat: 134,
-  AudibleAlert.chimeWarning2Repeat: 134,
-  AudibleAlert.chimeAlcStart: 80,
+  AudibleAlert.chimeWarningRepeat: 107,
+  AudibleAlert.chimeWarning2Repeat: 107,
+  AudibleAlert.chimeAlcStart: 50,
 }
 
 def get_total_writes():

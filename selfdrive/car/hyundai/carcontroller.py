@@ -58,7 +58,6 @@ class CarController():
     self.smartspeed_old = 0
     self.smartspeedupdate = False
     self.stopcontrolupdate = False
-    self.fixed_offset = 0
     self.button_res_stop = self.button_set_stop = 0
 
     self.curvature_factor = 1.
@@ -165,11 +164,9 @@ class CarController():
           self.recordsetspeed = 0
 
       if self.sm['liveMapData'].speedLimitValid and enabled and CS.out.cruiseState.enabled and op_params.get('smart_speed'):
-        self.smartspeed = self.sm['plan'].vCruiseMapd * speed_unit #self.sm['liveMapData'].speedLimit * speed_unit
-        print("smart speed", self.smartspeed)
-        self.fixed_offset = int(self.params.get("SpeedLimitOffset", encoding='utf8'))
-        self.smartspeed = max(self.smartspeed + int(self.fixed_offset), 20) if CS.is_set_speed_in_mph else \
-                          max(self.smartspeed + int(self.fixed_offset), 30)
+        self.smartspeed = self.sm['plan'].vCruiseMapd * speed_unit
+        self.smartspeed = max(self.smartspeed, 20) if CS.is_set_speed_in_mph else \
+                          max(self.smartspeed, 30)
 
         if self.smartspeed_old != self.smartspeed:
           self.smartspeedupdate = True

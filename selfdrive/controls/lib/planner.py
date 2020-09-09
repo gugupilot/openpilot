@@ -186,13 +186,16 @@ class Planner():
     cur_time = sec_since_boot()
 
     # we read offset value every 5 seconds
-    fixed_offset = 0.0
+    fixed_offset = 0
     if not travis:
-      fixed_offset = op_params.get('speed_offset')
+      if self.params.get("IsMetric", encoding='utf8') == "1":
+        fixed_offset = int(op_params.get('speed_offset')) * CV.KPH_TO_MS
+      else:
+        fixed_offset = int(op_params.get('speed_offset')) * CV.MPH_TO_MS
       if self.last_time > 5:
         try:
           self.offset = int(self.params.get("SpeedLimitOffset", encoding='utf8'))
-        except (TypeError,ValueError):
+        except (TypeError, ValueError):
           self.params.delete("SpeedLimitOffset")
           self.offset = 0
         self.osm = self.params.get("LimitSetSpeed", encoding='utf8') == "1"
