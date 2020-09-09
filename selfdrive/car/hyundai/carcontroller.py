@@ -170,6 +170,7 @@ class CarController():
 
         if self.smartspeed_old != self.smartspeed:
           self.smartspeedupdate = True
+          print("new smart speed", self.smartspeed)
           self.button_cnt = 0
 
         self.smartspeed_old = self.smartspeed
@@ -186,6 +187,7 @@ class CarController():
         speedtospam = self.setspeed
 
       if (frame - self.last_button_frame) > framestoskip and (self.smartspeedupdate or self.stopcontrolupdate):
+        print("spam speed", speedtospam)
         if (self.setspeed > (speedtospam * 1.005)) and (CS.cruise_buttons != 4):
           can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.SET_DECEL, self.current_veh_speed, self.button_cnt))
           if CS.cruise_buttons == 1:
