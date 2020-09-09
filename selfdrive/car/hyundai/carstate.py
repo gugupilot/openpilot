@@ -19,6 +19,10 @@ class CarState(CarStateBase):
     self.cruise_main_button = 0
     self.cruise_buttons = 0
     self.allow_nonscc_available = False
+  
+    self.lead_distance = 150.
+    self.radar_obj_valid = 0.
+    self.vrelative = 0.
 
   def update(self, cp, cp2, cp_cam):
     cp_mdps = cp2 if self.mdpsHarness else cp
@@ -26,9 +30,6 @@ class CarState(CarStateBase):
 
     self.prev_cruise_buttons = self.cruise_buttons
     self.prev_cruise_main_button = self.cruise_main_button
-    self.lead_distance = 150.
-    self.vrelative = 0.
-    self.radar_obj_valid = 0.
 
     ret = car.CarState.new_message()
 
