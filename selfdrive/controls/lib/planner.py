@@ -323,6 +323,9 @@ class Planner():
 
       v_cruise_setpoint = min([v_cruise_setpoint, v_curvature_map, v_speedlimit, v_speedlimit_ahead])
       self.v_cruise_mapd = min([v_curvature_map, v_speedlimit, v_speedlimit_ahead])
+      print("curve speed", v_curvature_map)
+      print("speed limit", v_speedlimit)
+      print("speed limit ahead", v_speedlimit_ahead)
       #if (self.mpc1.prev_lead_status and self.mpc1.v_mpc < v_ego*0.99) or (self.mpc2.prev_lead_status and self.mpc2.v_mpc < v_ego*0.99):
       #  v_cruise_setpoint = v_ego
 
