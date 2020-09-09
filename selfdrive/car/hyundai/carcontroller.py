@@ -1,4 +1,4 @@
-from numpy import interp, math
+from numpy import math
 
 from cereal import car, messaging
 from common.op_params import opParams
@@ -8,15 +8,8 @@ from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create
 from selfdrive.car.hyundai.values import Buttons, SteerLimitParams, CAR, FEATURES
 from opendbc.can.packer import CANPacker
 from selfdrive.config import Conversions as CV
-from selfdrive.controls.lib.pathplanner import LANE_CHANGE_SPEED_MIN
 
 from common.travis_checker import travis
-
-splmoffsetmphBp = [30, 40, 55, 60, 70]
-splmoffsetmphV = [0, 0, 0, 0, 0]
-
-splmoffsetkphBp = [30, 40, 55, 70]
-splmoffsetkphV = [0, 0, 0, 0]
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -186,8 +179,7 @@ class CarController():
 
       if self.sm['liveMapData'].speedLimitValid and enabled and CS.out.cruiseState.enabled and op_params.get('smart_speed'):
         self.smartspeed = self.sm['liveMapData'].speedLimit * speed_unit
-        self.fixed_offset = interp(self.smartspeed, splmoffsetmphBp, splmoffsetmphV) if CS.is_set_speed_in_mph else \
-                            interp(self.smartspeed, splmoffsetkphBp, splmoffsetkphV)
+        self.fixed_offset = op_params.get('speed_offset')
         self.smartspeed = max(self.smartspeed + int(self.fixed_offset), 20) if CS.is_set_speed_in_mph else \
                           max(self.smartspeed + int(self.fixed_offset), 30)
         self.smartspeed = min(self.smartspeed, max(self.smartspeed - 1.5 * self.fixed_offset, v_curvature_map))
