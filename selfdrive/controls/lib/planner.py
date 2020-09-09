@@ -129,6 +129,8 @@ class Planner():
     self.first_loop = True
     self.offset = 0
     self.last_time = 0
+    self.v_cruise_mapd = 0
+
 
   def choose_solution(self, v_cruise_setpoint, enabled, lead_1, lead_2, steeringAngle, model_enabled):
     center_x = -2.5 # Wheel base 2.5m
@@ -317,7 +319,7 @@ class Planner():
         v_speedlimit_ahead = v_ego
 
       v_cruise_setpoint = min([v_cruise_setpoint, v_curvature_map, v_speedlimit, v_speedlimit_ahead])
-      v_cruise_mapd = min([v_curvature_map, v_speedlimit, v_speedlimit_ahead])
+      self.v_cruise_mapd = min([v_curvature_map, v_speedlimit, v_speedlimit_ahead])
       #if (self.mpc1.prev_lead_status and self.mpc1.v_mpc < v_ego*0.99) or (self.mpc2.prev_lead_status and self.mpc2.v_mpc < v_ego*0.99):
       #  v_cruise_setpoint = v_ego
 
@@ -395,7 +397,7 @@ class Planner():
 
     plan_send.plan.vCurvature = float(v_curvature_map)
     plan_send.plan.decelForTurn = bool(decel_for_turn)
-    plan_send.plan.vCruiseMapd = float(v_cruise_mapd)
+    plan_send.plan.vCruiseMapd = float(self.v_cruise_mapd)
     plan_send.plan.mapValid = True
 
     radar_valid = not (radar_dead or radar_fault)
