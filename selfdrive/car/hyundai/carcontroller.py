@@ -45,6 +45,8 @@ class CarController():
     self.button_cnt = 0
     self.vdiff = 0
     self.nosccradar = CP.radarOffCan
+    self.resumebuttoncnt = 0
+    self.lastresumeframe = 0
 
     self.smartspeed = 20.
     self.recordsetspeed = 20.
@@ -110,13 +112,19 @@ class CarController():
 
     if pcm_cancel_cmd and not self.nosccradar:
       self.vdiff = 0.
-      can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.CANCEL, self.current_veh_speed, self.clu11_cnt))
+      self.resumebuttoncnt = 0
+      can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.CANCEL, self.current_veh_speed, self.resumebuttoncnt))
     elif CS.out.cruiseState.standstill and CS.vrelative > 0:
       self.vdiff += (CS.vrelative - self.vdiff)
-      if self.vdiff > 1. or CS.lead_distance > 8.:
-        can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.clu11_cnt))
+      if (frame - self.lastresumeframe > 10) and (self.vdiff > .5 or CS.lead_distance > 6.):
+        can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.resumebuttoncnt))
+        self.resumebuttoncnt += 1
+        if self.resumebuttoncnt > 5:
+          self.lastresumeframe = frame
+          self.resumebuttoncnt = 0
     else:
       self.vdiff = 0.
+      self.resumebuttoncnt = 0
 
     # 20 Hz LFA MFA message
     if frame % 5 == 0 and self.lfa_available:
