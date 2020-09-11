@@ -221,7 +221,6 @@ class CarController():
       can_sends.append(create_scc13(self.packer, CS.scc13))
       can_sends.append(create_scc14(self.packer, enabled, self.usestockscc, CS.scc14))
 
-
     # 20 Hz LFA MFA message
     if frame % 5 == 0 and self.lfa_available:
       can_sends.append(create_lfa_mfa(self.packer, frame, enabled))

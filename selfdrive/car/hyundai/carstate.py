@@ -232,6 +232,8 @@ class CarState(CarStateBase):
 
       ("AVH_STAT", "ESP11", 0),
 
+      ("CF_Ems_AclAct", "EMS16", 0),
+
       ("CF_Clu_CruiseSwState", "CLU11", 0),
       ("CF_Clu_CruiseSwMain", "CLU11", 0),
       ("CF_Clu_SldMainSW", "CLU11", 0),
@@ -251,8 +253,6 @@ class CarState(CarStateBase):
       ("DriverOverride", "TCS13",0),
 
       ("ESC_Off_Step", "TCS15", 0),
-
-      ("CF_Ems_AclAct", "EMS16", 0),
 
       ("CF_Lvr_GearInf", "LVR11", 0),        # Transmission Gear (0 = N or P, 1-8 = Fwd, 14 = Rev)
       ("CF_Lvr_CruiseSet", "LVR12", 0),
