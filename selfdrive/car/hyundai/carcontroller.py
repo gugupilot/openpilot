@@ -87,12 +87,12 @@ class CarController():
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
 
-    enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
+    enabled_speed = 38 if CS.is_set_speed_in_mph else 60
 
     if clu11_speed > enabled_speed or not lkas_active or CS.out.gearShifter != GearShifter.drive:
       enabled_speed = clu11_speed
-    else:
-      self.current_veh_speed = int(CS.out.vEgo * speed_conv)
+
+    self.current_veh_speed = int(CS.out.vEgo * speed_conv)
 
     self.clu11_cnt = frame % 0x10
     can_sends = []
@@ -102,22 +102,22 @@ class CarController():
                                    left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, self.lfa_available, 0))
 
-    if CS.mdpsHarness: # send lkas11 bus 1 if mdps
+    if CS.mdpsHarness:  # send lkas11 bus 1 if mdps
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled,
                                    left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, self.lfa_available, 1))
 
-      can_sends.append(create_clu11(self.packer, frame, 1, CS.clu11, Buttons.NONE, enabled_speed, self.clu11_cnt))
+      can_sends.append(create_clu11(self.packer, 1, CS.clu11, Buttons.NONE, enabled_speed, self.clu11_cnt))
 
     if pcm_cancel_cmd and not CS.nosccradar and not CS.out.standstill:
       self.vdiff = 0.
       self.resumebuttoncnt = 0
-      can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.CANCEL, self.current_veh_speed, self.clu11_cnt))
+      can_sends.append(create_clu11(self.packer, 0, CS.clu11, Buttons.CANCEL, self.current_veh_speed, self.clu11_cnt))
     elif CS.out.cruiseState.standstill and CS.vrelative > 0:
       self.vdiff += (CS.vrelative - self.vdiff)
       if (frame - self.lastresumeframe > 10) and (self.vdiff > .5 or CS.lead_distance > 6.):
-        can_sends.append(create_clu11(self.packer, frame, 0, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.resumebuttoncnt))
+        can_sends.append(create_clu11(self.packer, 0, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.resumebuttoncnt))
         self.resumebuttoncnt += 1
         if self.resumebuttoncnt > 5:
           self.lastresumeframe = frame
