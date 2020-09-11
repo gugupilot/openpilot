@@ -1,4 +1,3 @@
-from numpy import math
 from numpy import clip
 
 from cereal import car, messaging
