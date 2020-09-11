@@ -5,7 +5,7 @@ from common.op_params import opParams
 from common.params import Params
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.carstate import GearShifter
-from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfa_mfa
+from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfa_mfa, create_scc11, create_scc12
 from selfdrive.car.hyundai.values import Buttons, SteerLimitParams, CAR, FEATURES
 from opendbc.can.packer import CANPacker
 from selfdrive.config import Conversions as CV
