@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from cereal import car
 from selfdrive.config import Conversions as CV
-from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, Buttons
+from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, Buttons, HYBRID_VEH
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
 
@@ -173,7 +173,7 @@ class CarInterface(CarInterfaceBase):
                       CAR.GENESIS_G90]:
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiLegacy
 
-    if ret.mdpsHarness:
+    if ret.mdpsHarness or (fingerprint in HYBRID_VEH):
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
     if ret.radarOffCan:
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunityNonscc
