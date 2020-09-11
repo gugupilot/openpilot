@@ -9,9 +9,9 @@ const int HYUNDAI_COMMUNITY_STANDSTILL_THRSLD = 30;  // ~1kph
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4},// CLU11 Bus 0, 1, 2
-  {1157, 0, 4}, // LFAHDA_MFC Bus 0
-  {1056, 0, 8}, //   SCC11,  Bus 0
-  {1057, 0, 8}, //   SCC12,  Bus 0
+  {1157, 0, 4}, {1157, 1, 4}, // LFAHDA_MFC Bus 0, 1
+  {1056, 0, 8}, {1056, 1, 8}, //   SCC11,  Bus 0, 1
+  {1057, 0, 8}, {1057, 1, 8}, //   SCC12,  Bus 0, 1
   // {1290, 0, 8}, //   SCC13,  Bus 0
   // {905, 0, 8},  //   SCC14,  Bus 0
   // {1186, 0, 8}  //   4a2SCC, Bus 0
@@ -90,7 +90,7 @@ static uint8_t hyundai_community_compute_checksum(CAN_FIFOMailBox_TypeDef *to_pu
 static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
   bool valid;
-  if (hyundai_community_non_scc_car) {
+  if (hyundai_community_non_scc_car || hyundai_community_radar_harness_present) {
     valid = addr_safety_check(to_push, hyundai_community_nonscc_rx_checks, HYUNDAI_COMMUNITY_NONSCC_RX_CHECK_LEN,
                             hyundai_community_get_checksum, hyundai_community_compute_checksum,
                             hyundai_community_get_counter);
@@ -121,7 +121,7 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     }
 
     // enter controls on rising edge of ACC, exit controls on ACC off
-    if ((addr == 1057) && (!hyundai_community_non_scc_car)){
+    if ((addr == 1057) && (!hyundai_community_non_scc_car) && (!hyundai_community_radar_harness_present)){
       // 2 bits: 13-14
       int cruise_engaged = (GET_BYTES_04(to_push) >> 13) & 0x3;
       if (cruise_engaged && !cruise_engaged_prev) {
@@ -134,7 +134,7 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     }
 
     // engage for non ACC car
-    if ((addr == 1265) && (hyundai_community_non_scc_car)) {
+    if ((addr == 1265) && (hyundai_community_non_scc_car || hyundai_community_radar_harness_present)) {
       // first byte
       int cruise_engaged = (GET_BYTES_04(to_push) & 0x7);
       // enable on res+ or set- buttons rising edge
@@ -170,21 +170,6 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
     generic_rx_checks((addr == 832));
   }
-
-  if (valid && (bus == 2) && hyundai_community_radar_harness_present && (addr == 1057)) {
-
-    // enter controls on rising edge of ACC, exit controls on ACC off
-      // 2 bits: 13-14
-    int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal
-    if (cruise_engaged && !cruise_engaged_prev) {
-      controls_allowed = 1;
-    }
-    if (!cruise_engaged) {
-      controls_allowed = 0;
-    }
-    cruise_engaged_prev = cruise_engaged;
-  }
-
   return valid;
 }
 
