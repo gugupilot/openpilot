@@ -145,3 +145,20 @@ def create_scc12(packer, apply_accel, enabled, standstill, gaspressed, cruise_on
     values["CR_VSM_ChkSum"] = 16 - sum([sum(divmod(i, 16)) for i in dat]) % 16
 
   return packer.make_can_msg("SCC12", 0, values)
+
+def create_scc13(packer, scc13):
+  values = scc13
+  return packer.make_can_msg("SCC13", 0, values)
+
+def create_scc14(packer, enabled, usestockscc, scc14):
+  values = scc14
+  if not usestockscc:
+    if enabled:
+      values["JerkUpperLimit"] = 3.2
+      values["JerkLowerLimit"] = 0.1
+      values["SCCMode"] = 1
+      values["ComfortBandUpper"] = 0.24
+      values["ComfortBandLower"] = 0.24
+
+  return packer.make_can_msg("SCC14", 0, values)
+

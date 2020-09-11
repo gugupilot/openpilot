@@ -199,7 +199,8 @@ class CarState(CarStateBase):
     self.clu11 = copy.copy(cp.vl["CLU11"])
     self.scc11 = copy.copy(cp_scc.vl["SCC11"])
     self.scc12 = copy.copy(cp_scc.vl["SCC12"])
-    self.mdps12 = copy.copy(cp_mdps.vl["MDPS12"])
+    self.scc13 = cp_scc.vl["SCC13"]
+    self.scc14 = cp_scc.vl["SCC14"]
 
     return ret
 
@@ -478,6 +479,16 @@ class CarState(CarStateBase):
         ("AEB_StopReq", "SCC12", 0),
         ("CR_VSM_Alive", "SCC12", 0),
         ("CR_VSM_ChkSum", "SCC12", 0),
+
+        ("SCCDrvModeRValue", "SCC13", 2),
+        ("SCC_Equip", "SCC13", 1),
+        ("AebDrvSetStatus", "SCC13", 0),
+
+        ("JerkUpperLimit", "SCC14", 0),
+        ("JerkLowerLimit", "SCC14", 0),
+        ("SCCMode2", "SCC14", 0),
+        ("ComfortBandUpper", "SCC14", 0),
+        ("ComfortBandLower", "SCC14", 0),
       ]
       if not CP.radarOffCan:
         checks += [
