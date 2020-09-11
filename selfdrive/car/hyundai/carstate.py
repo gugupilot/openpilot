@@ -365,7 +365,7 @@ class CarState(CarStateBase):
         ("LVR12", 100)
       ]
 
-    if CP.fcaAvailable:
+    if CP.fcaAvailable and CP.sccBus == 0:
       signals += [
         ("FCA_CmdAct", "FCA11", 0),
         ("CF_VSM_Warn", "FCA11", 0),
@@ -454,5 +454,40 @@ class CarState(CarStateBase):
         ("Navi_SCC_Curve_Act", "SCC11", 0),
         ("Navi_SCC_Camera_Act", "SCC11", 0),
         ("Navi_SCC_Camera_Status", "SCC11", 2),
+
+        ("ACCMode", "SCC12", 0),
+        ("CF_VSM_Prefill", "SCC12", 0),
+        ("CF_VSM_DecCmdAct", "SCC12", 0),
+        ("CF_VSM_HBACmd", "SCC12", 0),
+        ("CF_VSM_Warn", "SCC12", 0),
+        ("CF_VSM_Stat", "SCC12", 0),
+        ("CF_VSM_BeltCmd", "SCC12", 0),
+        ("ACCFailInfo", "SCC12", 0),
+        ("ACCMode", "SCC12", 0),
+        ("StopReq", "SCC12", 0),
+        ("CR_VSM_DecCmd", "SCC12", 0),
+        ("aReqRaw", "SCC12", 0), #aReqMax
+        ("TakeOverReq", "SCC12", 0),
+        ("PreFill", "SCC12", 0),
+        ("aReqValue", "SCC12", 0), #aReqMin
+        ("CF_VSM_ConfMode", "SCC12", 1),
+        ("AEB_Failinfo", "SCC12", 0),
+        ("AEB_Status", "SCC12", 2),
+        ("AEB_CmdAct", "SCC12", 0),
+        ("AEB_StopReq", "SCC12", 0),
+        ("CR_VSM_Alive", "SCC12", 0),
+        ("CR_VSM_ChkSum", "SCC12", 0),
+      ]
+      if not CP.radarOffCan:
+        checks += [
+          ("SCC11", 50),
+          ("SCC12", 50),
+        ]
+      if CP.fcaAvailable:
+        signals += [
+        ("FCA_CmdAct", "FCA11", 0),
+        ("CF_VSM_Warn", "FCA11", 0),
+        ]
+        checks += [("FCA11", 50)]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 2)

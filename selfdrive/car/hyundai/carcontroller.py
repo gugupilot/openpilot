@@ -223,7 +223,7 @@ class CarController():
 
     # Speed Limit Related Stuff  Lot's of comments for others to understand!
 
-    if not travis:
+    if not travis and self.usestockscc:
       self.sm.update(0)
       op_params = opParams()
       dat = self.sm['radarState'].leadOne
@@ -231,24 +231,25 @@ class CarController():
       speed_unit = CV.MS_TO_MPH if CS.is_set_speed_in_mph else CV.MS_TO_KPH
       self.setspeed = CS.out.cruiseState.speed * speed_unit
 
-      if not CS.radar_obj_valid and dat.status and dat.vLead < 3. \
-              and  CS.out.cruiseState.enabled and not CS.out.gasPressed:
-        aRel = (dat.vLead**2 - CS.out.vEgo**2)/(2 * dat.dRel)
-        print("aRel", aRel)
-        if aRel < -.5 or self.stopcontrolupdate:
-          self.stopcontrolupdate = True
-          print("STOPPED VEHICLE")
-          self.stopspeed = 20 if CS.is_set_speed_in_mph else 30
-          if not self.stopcontrolupdate:
-            self.button_cnt = 0
-            self.recordsetspeed = self.setspeed
-      else:
-        if self.setspeed != self.recordsetspeed and self.stopcontrolupdate and  CS.out.cruiseState.enabled \
-                and CS.radar_obj_valid and not CS.out.gasPressed:
-          self.stopspeed = self.recordsetspeed
+      if not op_params.get('smart_speed'):
+        if not CS.radar_obj_valid and dat.status and dat.vLead < 3. \
+                and  CS.out.cruiseState.enabled and not CS.out.gasPressed:
+          aRel = (dat.vLead**2 - CS.out.vEgo**2)/(2 * dat.dRel)
+          print("aRel", aRel)
+          if aRel < -.5 or self.stopcontrolupdate:
+            self.stopcontrolupdate = True
+            print("STOPPED VEHICLE")
+            self.stopspeed = 20 if CS.is_set_speed_in_mph else 30
+            if not self.stopcontrolupdate:
+              self.button_cnt = 0
+              self.recordsetspeed = self.setspeed
         else:
-          self.stopcontrolupdate = False
-          self.recordsetspeed = 0
+          if self.setspeed != self.recordsetspeed and self.stopcontrolupdate and  CS.out.cruiseState.enabled \
+                  and CS.radar_obj_valid and not CS.out.gasPressed:
+            self.stopspeed = self.recordsetspeed
+          else:
+            self.stopcontrolupdate = False
+            self.recordsetspeed = 0
 
       if self.sm['liveMapData'].speedLimitValid and enabled and CS.out.cruiseState.enabled and op_params.get('smart_speed'):
         self.smartspeed = self.sm['plan'].vCruiseMapd * speed_unit
