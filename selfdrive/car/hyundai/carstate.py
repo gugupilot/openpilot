@@ -125,7 +125,7 @@ class CarState(CarStateBase):
     else:
       ret.gas = cp.vl["EMS12"]['PV_AV_CAN'] / 100
 
-    ret.gasPressed = (cp.vl["TCS13"]["DriverOverride"] == 1) # or (ret.gas > 0.)
+    ret.gasPressed = (cp.vl["TCS13"]["DriverOverride"] == 1)
 
     ret.espDisabled = (cp.vl["TCS15"]['ESC_Off_Step'] != 0)
 
@@ -272,6 +272,7 @@ class CarState(CarStateBase):
         ("SCCInfoDisplay", "SCC11", 0),
         ("ACC_ObjStatus", "SCC11", 0),
         ("ACC_ObjDist", "SCC11", 0),
+        ("ObjValid", "SCC11", 0),
         ("ACC_ObjRelSpd", "SCC11", 0),
         ("ACCMode", "SCC12", 1),
       ]
@@ -279,6 +280,17 @@ class CarState(CarStateBase):
         ("SCC11", 50),
         ("SCC12", 50),
       ]
+      if CP.fcaAvailable:
+        signals += [
+          ("FCA_CmdAct", "FCA11", 0),
+          ("CF_VSM_Warn", "FCA11", 0),
+        ]
+        checks += [("FCA11", 50)]
+      else:
+        signals += [
+          ("AEB_CmdAct", "SCC12", 0),
+          ("CF_VSM_Warn", "SCC12", 0),
+        ]
 
     if not CP.mdpsHarness:
       signals += [
@@ -363,18 +375,6 @@ class CarState(CarStateBase):
       ]
       checks += [
         ("LVR12", 100)
-      ]
-
-    if CP.fcaAvailable and CP.sccBus == 0:
-      signals += [
-        ("FCA_CmdAct", "FCA11", 0),
-        ("CF_VSM_Warn", "FCA11", 0),
-      ]
-      checks += [("FCA11", 50)]
-    elif CP.sccBus == 0:
-      signals += [
-        ("AEB_CmdAct", "SCC12", 0),
-        ("CF_VSM_Warn", "SCC12", 0),
       ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 0)

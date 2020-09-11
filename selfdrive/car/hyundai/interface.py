@@ -226,6 +226,7 @@ class CarInterface(CarInterfaceBase):
     ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
 
     events, events_arne182 = self.create_common_events(ret)
+
     self.CP.enableCruise = (not self.CP.openpilotLongitudinalControl) or self.CC.usestockscc
     if self.CS.brakeHold and not self.CC.usestockscc:
       events.add(EventName.brakeHold)
@@ -272,7 +273,7 @@ class CarInterface(CarInterfaceBase):
     # handle button press
     for b in self.buttonEvents:
       if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and b.pressed \
-              and (not ret.brakePressed or not ret.standstill) and (self.CP.radarOffCan or not self.CP.enableCruise):
+              and (not ret.brakePressed or ret.standstill) and (self.CP.radarOffCan or not self.CP.enableCruise):
         events.add(EventName.buttonEnable)
       if b.type == ButtonType.cancel and b.pressed:
         events.add(EventName.buttonCancel)
