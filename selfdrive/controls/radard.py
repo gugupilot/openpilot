@@ -170,10 +170,14 @@ class RadarD():
       dat.radarState.leadOne = get_lead(self.v_ego, self.ready, clusters, sm['model'].lead, low_speed_override=True)
       if not dat.radarState.leadOne.status:
         dat.radarState.leadOne.dRel = 150
+        dat.radarState.leadOne.vRel = 50
+        dat.radarState.leadOne.aRel = 0
 
       dat.radarState.leadTwo = get_lead(self.v_ego, self.ready, clusters, sm['model'].leadFuture, low_speed_override=False)
       if not dat.radarState.leadTwo.status:
         dat.radarState.leadTwo.dRel = 150
+        dat.radarState.leadTwo.vRel = 50
+        dat.radarState.leadTwo.aRel = 0
     return dat
 
 
@@ -205,7 +209,7 @@ def radard_thread(sm=None, pm=None, can_sock=None):
   rk = Ratekeeper(1.0 / CP.radarTimeStep, print_delay_threshold=None)
   RD = RadarD(CP.radarTimeStep, RI.delay)
 
-  enable_lead = CP.openpilotLongitudinalControl
+  enable_lead = True
 
   while 1:
     can_strings = messaging.drain_sock_raw(can_sock, wait_for_one=True)
