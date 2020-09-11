@@ -125,7 +125,7 @@ class CarState(CarStateBase):
     else:
       ret.gas = cp.vl["EMS12"]['PV_AV_CAN'] / 100
 
-    ret.gasPressed = (cp.vl["TCS13"]["DriverOverride"] == 1)
+    ret.gasPressed = (cp.vl["TCS13"]["DriverOverride"] == 1) or bool(cp.vl["EMS16"]["CF_Ems_AclAct"])
 
     ret.espDisabled = (cp.vl["TCS15"]['ESC_Off_Step'] != 0)
 
@@ -251,6 +251,8 @@ class CarState(CarStateBase):
 
       ("ESC_Off_Step", "TCS15", 0),
 
+      ("CF_Ems_AclAct", "EMS16", 0),
+
       ("CF_Lvr_GearInf", "LVR11", 0),        # Transmission Gear (0 = N or P, 1-8 = Fwd, 14 = Rev)
       ("CF_Lvr_CruiseSet", "LVR12", 0),
     ]
@@ -342,7 +344,6 @@ class CarState(CarStateBase):
     else:
       signals += [
         ("PV_AV_CAN", "EMS12", 0),
-        ("CF_Ems_AclAct", "EMS16", 0),
       ]
       checks += [
         ("EMS12", 100),
