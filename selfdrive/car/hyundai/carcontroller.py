@@ -5,7 +5,6 @@ from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create
 from selfdrive.car.hyundai.values import Buttons, SteerLimitParams, CAR, FEATURES
 from opendbc.can.packer import CANPacker
 from selfdrive.config import Conversions as CV
-from selfdrive.controls.lib.pathplanner import LANE_CHANGE_SPEED_MIN
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -41,8 +40,6 @@ class CarController():
     self.steer_rate_limited = False
     self.current_veh_speed = 0
     self.lfainFingerprint = CP.lfaAvailable
-    self.last_button_frame = 0
-    self.button_cnt = 0
     self.vdiff = 0
     self.nosccradar = CP.radarOffCan
     self.resumebuttoncnt = 0
@@ -52,6 +49,8 @@ class CarController():
     self.recordsetspeed = 20.
     self.setspeed = 0.
     self.button_cnt = 0
+    self.last_button_frame = 0
+
     self.stopcontrolupdate = False
     self.last_button_frame = 0
     self.button_set_stop = self.button_res_stop = 0
@@ -85,17 +84,19 @@ class CarController():
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
 
+    speed_conv = CV.MS_TO_MPH if CS.is_set_speed_in_mph else CV.MS_TO_KPH
+
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
+
     enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
+
     if clu11_speed > enabled_speed or not lkas_active or CS.out.gearShifter != GearShifter.drive:
       enabled_speed = clu11_speed
     else:
-      if CS.is_set_speed_in_mph:
-        self.current_veh_speed = int( CS.out.vEgo * CV.MS_TO_MPH)
-      else:
-        self.current_veh_speed = int(CS.out.vEgo * CV.MS_TO_KPH)
-    can_sends = []
+      self.current_veh_speed = int(CS.out.vEgo * speed_conv)
+
     self.clu11_cnt = frame % 0x10
+    can_sends = []
 
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled,
@@ -137,9 +138,9 @@ class CarController():
 
     dat = self.sm['radarState'].leadOne
     if CS.is_set_speed_in_mph:
-      self.setspeed = CS.out.cruiseState.speed * CV.MS_TO_MPH
+      self.setspeed = CS.out.cruiseState.speed * speed_conv
     else:
-      self.setspeed = CS.out.cruiseState.speed * CV.MS_TO_KPH
+      self.setspeed = CS.out.cruiseState.speed * speed_conv
 
     if not CS.radar_obj_valid and dat.status and dat.vLead < 3. \
             and  CS.out.cruiseState.enabled and not CS.out.gasPressed:

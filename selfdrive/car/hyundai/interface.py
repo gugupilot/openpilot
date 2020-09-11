@@ -36,8 +36,8 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kfBP = [0., 5.]
     ret.longitudinalTuning.kfV = [1., 1.]
 
-    ret.lateralTuning.pid.kiBP = [0., 1., 20.]
-    ret.lateralTuning.pid.kpV = [0.01, 0.03, 0.03]
+    ret.lateralTuning.pid.kiBP = [0., 1., 5.]
+    ret.lateralTuning.pid.kpV = [0.01, 0.03, 0.05]
     ret.lateralTuning.pid.kpBP = [0., 10., 30.]
     ret.lateralTuning.pid.kiV = [0.001, 0.003, 0.003]
     ret.lateralTuning.pid.kfBP = [0., 10., 30.]
@@ -162,8 +162,8 @@ class CarInterface(CarInterfaceBase):
     # these cars require a special panda safety mode due to missing counters and checksums in the messages
 
     ret.radarOffCan = 1057 not in fingerprint[0]
-    ret.mdpsHarness = True if 593 in fingerprint[1] and (len(fingerprint[1]) <= 3) else False
-    ret.sasBus = 1 if 688 in fingerprint[1] and (len(fingerprint[1]) <= 3) else 0
+    ret.mdpsHarness = True if 593 in fingerprint[1] and 1296 not in fingerprint[1] else False
+    ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
     ret.fcaAvailable = True if 909 in fingerprint[0] or 909 in fingerprint[2] else False
     ret.bsmAvailable = True if 1419 in fingerprint[0] else False
     ret.lfaAvailable = True if 1157 in fingerprint[0] else False
@@ -244,7 +244,7 @@ class CarInterface(CarInterfaceBase):
     # handle button press
     for b in self.buttonEvents:
       if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and b.pressed \
-              and not ret.brakePressed and self.CC.nosccradar:
+              and (not ret.brakePressed or ret.standstill) and self.CC.nosccradar:
         events.add(EventName.buttonEnable)
       if b.type == ButtonType.cancel and b.pressed:
         events.add(EventName.buttonCancel)

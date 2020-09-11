@@ -72,7 +72,7 @@ class CarState(CarStateBase):
       ret.cruiseState.standstill = cp.vl["SCC11"]['SCCInfoDisplay'] == 4.
       self.lead_distance = cp.vl["SCC11"]['ACC_ObjDist']
       self.vrelative = cp.vl["SCC11"]['ACC_ObjRelSpd']
-      self.radar_obj_valid = cp.vl["SCC11"]['ACC_ObjStatus']
+      self.radar_obj_valid = cp.vl["SCC11"]['ObjValid']
 
 
     self.is_set_speed_in_mph = int(cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"])
@@ -99,7 +99,7 @@ class CarState(CarStateBase):
     else:
       ret.gas = cp.vl["EMS12"]['PV_AV_CAN'] / 100
 
-    ret.gasPressed = (cp.vl["TCS13"]["DriverOverride"] == 1) or (ret.gas > 0.)
+    ret.gasPressed = (cp.vl["TCS13"]["DriverOverride"] == 1)
 
     # TODO: refactor gear parsing in function
     # Gear Selection via Cluster - For those Kia/Hyundai which are not fully discovered, we can use the Cluster Indicator for Gear Selection,
@@ -239,6 +239,7 @@ class CarState(CarStateBase):
         ("SCCInfoDisplay", "SCC11", 0),
         ("ACC_ObjStatus", "SCC11", 0),
         ("ACC_ObjDist", "SCC11", 0),
+        ("ObjValid", "SCC11", 0),
         ("ACC_ObjRelSpd", "SCC11", 0),
         ("ACCMode", "SCC12", 1),
       ]
