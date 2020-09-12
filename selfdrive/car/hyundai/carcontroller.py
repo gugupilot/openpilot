@@ -227,7 +227,7 @@ class CarController():
 
     # Speed Limit Related Stuff  Lot's of comments for others to understand!
 
-    if not travis and self.usestockscc:
+    if not travis and (self.usestockscc or CS.nosccradar):
       self.sm.update(0)
       op_params = opParams()
       dat = self.sm['radarState'].leadOne
