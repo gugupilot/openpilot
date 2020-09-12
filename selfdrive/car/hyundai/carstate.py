@@ -186,7 +186,7 @@ class CarState(CarStateBase):
     if self.CP.fcaAvailable:
       ret.stockAeb = cp_scc.vl["FCA11"]['FCA_CmdAct'] != 0
       ret.stockFcw = cp_scc.vl["FCA11"]['CF_VSM_Warn'] == 2
-    else:
+    elif not self.nosccradar:
       ret.stockAeb = cp_scc.vl["SCC12"]['AEB_CmdAct'] != 0
       ret.stockFcw = cp_scc.vl["SCC12"]['CF_VSM_Warn'] == 2
 
@@ -199,8 +199,8 @@ class CarState(CarStateBase):
     self.clu11 = copy.copy(cp.vl["CLU11"])
     self.scc11 = copy.copy(cp_scc.vl["SCC11"])
     self.scc12 = copy.copy(cp_scc.vl["SCC12"])
-    self.scc13 = cp_scc.vl["SCC13"]
-    self.scc14 = cp_scc.vl["SCC14"]
+    self.scc13 = copy.copy(cp_scc.vl["SCC13"])
+    self.scc14 = copy.copy(cp_scc.vl["SCC14"])
 
     return ret
 
@@ -468,10 +468,10 @@ class CarState(CarStateBase):
         ("ACCMode", "SCC12", 0),
         ("StopReq", "SCC12", 0),
         ("CR_VSM_DecCmd", "SCC12", 0),
-        ("aReqRaw", "SCC12", 0), #aReqMax
+        ("aReqRaw", "SCC12", 0),
         ("TakeOverReq", "SCC12", 0),
         ("PreFill", "SCC12", 0),
-        ("aReqValue", "SCC12", 0), #aReqMin
+        ("aReqValue", "SCC12", 0),
         ("CF_VSM_ConfMode", "SCC12", 1),
         ("AEB_Failinfo", "SCC12", 0),
         ("AEB_Status", "SCC12", 2),
@@ -497,9 +497,9 @@ class CarState(CarStateBase):
         ]
       if CP.fcaAvailable:
         signals += [
-        ("FCA_CmdAct", "FCA11", 0),
-        ("CF_VSM_Warn", "FCA11", 0),
+          ("FCA_CmdAct", "FCA11", 0),
+          ("CF_VSM_Warn", "FCA11", 0),
         ]
-        checks += [("FCA11", 50)]
+        checks += [("FCA11", 100)]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 2)
