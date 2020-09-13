@@ -227,12 +227,12 @@ class CarController():
 
     # Speed Limit Related Stuff  Lot's of comments for others to understand!
 
-    if not travis and (self.usestockscc or CS.nosccradar):
+    if not travis and (self.usestockscc or CS.CP.radarOffCan):
       self.sm.update(0)
       op_params = opParams()
       dat = self.sm['radarState'].leadOne
 
-      if CS.nosccradar:
+      if CS.CP.radarOffCan:
         minsetspeed = 25 if CS.is_set_speed_in_mph else 40
       else:
         minsetspeed = 20 if CS.is_set_speed_in_mph else 30
@@ -241,7 +241,7 @@ class CarController():
       self.setspeed = CS.out.cruiseState.speed * speed_unit
 
       if op_params.get('xps_button_spam'):
-        if not CS.radar_obj_valid and dat.status and (dat.vLead < 3. or CS.nosccradar) \
+        if not CS.radar_obj_valid and dat.status and (dat.vLead < 3. or CS.CP.radarOffCan) \
                 and  CS.out.cruiseState.enabled and not CS.out.gasPressed:
           aRel = (dat.vLead**2 - CS.out.vEgo**2)/(2 * dat.dRel)
           print("aRel", aRel)
@@ -263,6 +263,8 @@ class CarController():
       if self.sm['liveMapData'].speedLimitValid and enabled and not self.stopcontrolupdate \
               and CS.out.cruiseState.enabled and op_params.get('xps_button_spam'):
         self.smartspeed = self.sm['plan'].vCruiseMapd * speed_unit
+        if dat.status and CS.CP.radarOffCan:
+          self.smartspeed = min(self.smartspeed, dat.vLead)
         self.smartspeed = max(self.smartspeed, minsetspeed)
 
         print("speed limit  +++++++++++++++++++++++++++++++++++", self.smartspeed)
