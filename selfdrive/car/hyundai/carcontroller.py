@@ -264,7 +264,7 @@ class CarController():
               and CS.out.cruiseState.enabled and op_params.get('xps_button_spam'):
         self.smartspeed = self.sm['plan'].vCruiseMapd * speed_unit
         if dat.status and CS.CP.radarOffCan:
-          self.smartspeed = min(self.smartspeed, dat.vLead)
+          self.smartspeed = min(self.smartspeed, dat.vLead * speed_unit)
         self.smartspeed = max(self.smartspeed, minsetspeed)
 
         print("speed limit  +++++++++++++++++++++++++++++++++++", self.smartspeed)
