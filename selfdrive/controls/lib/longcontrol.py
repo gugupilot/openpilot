@@ -126,8 +126,8 @@ class LongControl():
     except AttributeError:
       gas_interceptor = False
     # Actuation limits
-    #gas_max = interp(CS.vEgo, CP.gasMaxBP, CP.gasMaxV)
-    gas_max = self.dynamic_gas(CS.vEgo, gas_interceptor, gas_button_status)
+    gas_max = interp(CS.vEgo, CP.gasMaxBP, CP.gasMaxV)
+    #gas_max = self.dynamic_gas(CS.vEgo, gas_interceptor, gas_button_status)
     brake_max = interp(CS.vEgo, CP.brakeMaxBP, CP.brakeMaxV)
 
     # Update state machine
