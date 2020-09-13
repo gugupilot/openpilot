@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from cereal import car, arne182
 from common import params
+from common.op_params import opParams
 from common.params import Params
 from selfdrive.config import Conversions as CV
 from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, Buttons, HYBRID_VEH
@@ -178,14 +179,16 @@ class CarInterface(CarInterfaceBase):
 
     ret.mdpsHarness = True if 593 in fingerprint[1] and len(fingerprint[1]) <= 3 else False
     ret.sasBus = 1 if 688 in fingerprint[1] and len(fingerprint[1]) <= 3 else 0
-    ret.fcaAvailable = True if 909 in fingerprint[0] or 909 in fingerprint[2] else False
+    ret.fcaBus = 0 if 909 in fingerprint[0] else 2 if 909 in fingerprint[2] else -1
     ret.bsmAvailable = True if 1419 in fingerprint[0] else False
     ret.lfaAvailable = True if 1157 in fingerprint[0] else False
   
     ret.sccBus = 0 if 1057 in fingerprint[0] else 2 if 1057 in fingerprint[2] else -1
     ret.radarOffCan = (ret.sccBus == -1)
     ret.radarTimeStep = 0.02
-    ret.openpilotLongitudinalControl = not (ret.sccBus == 0)
+
+    op_params = opParams()
+    ret.openpilotLongitudinalControl = not (ret.sccBus == 0) and (not ret.radarOffCan or not op_params.get('xps_button_spam'))
 
     if candidate in [ CAR.HYUNDAI_GENESIS, CAR.IONIQ_EV_LTD, CAR.IONIQ_HEV, CAR.KONA_EV, CAR.KIA_SORENTO, CAR.SONATA_2019,
                       CAR.KIA_OPTIMA, CAR.VELOSTER, CAR.KIA_STINGER, CAR.GENESIS_G70, CAR.SONATA_HEV, CAR.SANTA_FE, CAR.GENESIS_G80,

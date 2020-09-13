@@ -124,13 +124,13 @@ class CarController():
     lkas_active = enabled and ((abs(CS.out.steeringAngle) < 90.) or self.high_steer_allowed)
 
     # fix for Genesis hard fault at low speed
-    if CS.out.vEgo < 55 * CV.KPH_TO_MS and self.car_fingerprint == CAR.HYUNDAI_GENESIS and not CS.mdpsHarness:
+    if CS.out.vEgo < 55 * CV.KPH_TO_MS and self.car_fingerprint == CAR.HYUNDAI_GENESIS and not CS.CP.mdpsHarness:
       lkas_active = False
 
     if not lkas_active:
       apply_steer = 0
 
-    if CS.nosccradar:
+    if CS.CP.radarOffCan:
       self.usestockscc = not self.cp_oplongcontrol
     elif (CS.cancel_button_count == 3) and self.cp_oplongcontrol:
       self.usestockscc = not self.usestockscc
@@ -161,7 +161,7 @@ class CarController():
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
 
-    enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
+    enabled_speed = 38 if CS.is_set_speed_in_mph else 60
 
     if clu11_speed > enabled_speed or not lkas_active or CS.out.gearShifter != GearShifter.drive:
       enabled_speed = clu11_speed
@@ -176,7 +176,7 @@ class CarController():
                                    left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, self.lfa_available, 0))
 
-    if CS.mdpsHarness:  # send lkas11 bus 1 if mdps
+    if CS.CP.mdpsHarness:  # send lkas11 bus 1 if mdps
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled,
                                    left_lane, right_lane,
@@ -184,14 +184,14 @@ class CarController():
 
       can_sends.append(create_clu11(self.packer, 1, CS.clu11, Buttons.NONE, enabled_speed, self.clu11_cnt))
 
-    if pcm_cancel_cmd and not CS.nosccradar and self.usestockscc and CS.scc12["ACCMode"] and not CS.out.standstill:
+    if pcm_cancel_cmd and not CS.CP.radarOffCan and self.usestockscc and CS.scc12["ACCMode"] and not CS.out.standstill:
       self.vdiff = 0.
       self.resumebuttoncnt = 0
-      can_sends.append(create_clu11(self.packer, CS.scc_bus, CS.clu11, Buttons.CANCEL, self.current_veh_speed, self.clu11_cnt))
-    elif CS.out.cruiseState.standstill and not CS.nosccradar and self.usestockscc and CS.vrelative > 0:
+      can_sends.append(create_clu11(self.packer, CS.CP.sccBus, CS.clu11, Buttons.CANCEL, self.current_veh_speed, self.clu11_cnt))
+    elif CS.out.cruiseState.standstill and not CS.CP.radarOffCan and self.usestockscc and CS.vrelative > 0:
       self.vdiff += (CS.vrelative - self.vdiff)
       if (frame - self.lastresumeframe > 10) and (self.vdiff > .5 or CS.lead_distance > 6.):
-        can_sends.append(create_clu11(self.packer, CS.scc_bus, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.resumebuttoncnt))
+        can_sends.append(create_clu11(self.packer, CS.CP.sccBus, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.resumebuttoncnt))
         self.resumebuttoncnt += 1
         if self.resumebuttoncnt > 5:
           self.lastresumeframe = frame
@@ -205,18 +205,18 @@ class CarController():
     set_speed *= speed_conv
 
     # send scc to car if longcontrol enabled and SCC not on bus 0 or ont live
-    if (CS.scc_bus == 2 or not self.usestockscc) and frame % 2 == 0:
+    if (CS.CP.sccBus == 2 or not self.usestockscc) and frame % 2 == 0:
       self.scc12cnt += 1
       self.scc12cnt %= 0xF
       can_sends.append(create_scc11(self.packer, enabled,
                                     set_speed, self.lead_visible,
                                     self.gapsettingdance,
-                                    CS.out.standstill, CS.scc11, self.usestockscc, CS.nosccradar, frame))
+                                    CS.out.standstill, CS.scc11, self.usestockscc, CS.CP.radarOffCan, frame))
 
       can_sends.append(create_scc12(self.packer, apply_accel, enabled,
                                     self.acc_standstill, CS.out.gasPressed, CS.out.brakePressed,
                                     CS.scc11["MainMode_ACC"], CS.out.stockAeb,
-                                    CS.scc12, self.usestockscc, CS.nosccradar, self.scc12cnt))
+                                    CS.scc12, self.usestockscc, CS.CP.radarOffCan, self.scc12cnt))
 
       can_sends.append(create_scc13(self.packer, CS.scc13))
       can_sends.append(create_scc14(self.packer, enabled, self.usestockscc, CS.out.stockAeb, CS.scc14))
@@ -232,35 +232,40 @@ class CarController():
       op_params = opParams()
       dat = self.sm['radarState'].leadOne
 
+      if CS.nosccradar:
+        minsetspeed = 25 if CS.is_set_speed_in_mph else 40
+      else:
+        minsetspeed = 20 if CS.is_set_speed_in_mph else 30
+
       speed_unit = CV.MS_TO_MPH if CS.is_set_speed_in_mph else CV.MS_TO_KPH
       self.setspeed = CS.out.cruiseState.speed * speed_unit
 
-      if not op_params.get('smart_speed'):
-        if not CS.radar_obj_valid and dat.status and dat.vLead < 3. \
+      if op_params.get('xps_button_spam'):
+        if not CS.radar_obj_valid and dat.status and (dat.vLead < 3. or CS.nosccradar) \
                 and  CS.out.cruiseState.enabled and not CS.out.gasPressed:
           aRel = (dat.vLead**2 - CS.out.vEgo**2)/(2 * dat.dRel)
           print("aRel", aRel)
           if aRel < -.5 or self.stopcontrolupdate:
             self.stopcontrolupdate = True
             print("STOPPED VEHICLE")
-            self.stopspeed = 20 if CS.is_set_speed_in_mph else 30
+            self.stopspeed = max(self.setspeed - 15, minsetspeed)
             if not self.stopcontrolupdate:
               self.button_cnt = 0
               self.recordsetspeed = self.setspeed
         else:
-          if self.setspeed != self.recordsetspeed and self.stopcontrolupdate and  CS.out.cruiseState.enabled \
+          if self.setspeed != self.recordsetspeed and self.stopcontrolupdate and CS.out.cruiseState.enabled \
                   and CS.radar_obj_valid and not CS.out.gasPressed:
             self.stopspeed = self.recordsetspeed
           else:
             self.stopcontrolupdate = False
             self.recordsetspeed = 0
 
-      if self.sm['liveMapData'].speedLimitValid and enabled and CS.out.cruiseState.enabled and op_params.get('smart_speed'):
+      if self.sm['liveMapData'].speedLimitValid and enabled and not self.stopcontrolupdate \
+              and CS.out.cruiseState.enabled and op_params.get('xps_button_spam'):
         self.smartspeed = self.sm['plan'].vCruiseMapd * speed_unit
-        self.smartspeed = max(self.smartspeed, 20) if CS.is_set_speed_in_mph else \
-                          max(self.smartspeed, 30)
+        self.smartspeed = max(self.smartspeed, minsetspeed)
 
-        print("speed ahead  +++++++++++++++++++++++++++++++++++",self.sm['liveMapData'].speedLimitAhead)
+        print("speed limit  +++++++++++++++++++++++++++++++++++", self.smartspeed)
         if self.smartspeed_old != self.smartspeed:
           self.smartspeedupdate = True
           print("new smart speed------------------", self.smartspeed)
@@ -282,13 +287,13 @@ class CarController():
 
       if (frame - self.last_button_frame) > framestoskip and (self.smartspeedupdate or self.stopcontrolupdate):
         if (self.setspeed > (speedtospam * 1.005)) and (CS.cruise_buttons != 4):
-          can_sends.append(create_clu11(self.packer, CS.scc_bus, CS.clu11, Buttons.SET_DECEL, self.current_veh_speed, self.button_cnt))
+          can_sends.append(create_clu11(self.packer, CS.CP.sccBus, CS.clu11, Buttons.SET_DECEL, self.current_veh_speed, self.button_cnt))
           if CS.cruise_buttons == 1:
              self.button_res_stop += 2
           else:
              self.button_res_stop -= 1
         elif (self.setspeed < (speedtospam / 1.005)) and (CS.cruise_buttons != 4):
-          can_sends.append(create_clu11(self.packer, CS.scc_bus, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.button_cnt))
+          can_sends.append(create_clu11(self.packer, CS.CP.sccBus, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.button_cnt))
           if CS.cruise_buttons == 2:
              self.button_set_stop += 2
           else:
