@@ -130,8 +130,9 @@ class CarController():
     if not lkas_active:
       apply_steer = 0
 
+    op_params = opParams()
     if CS.CP.radarOffCan:
-      self.usestockscc = not self.cp_oplongcontrol
+      self.usestockscc = not self.cp_oplongcontrol or op_params.get('xps_button_spam')
     elif (CS.cancel_button_count == 3) and self.cp_oplongcontrol:
       self.usestockscc = not self.usestockscc
 
@@ -229,7 +230,6 @@ class CarController():
 
     if not travis and (self.usestockscc or CS.CP.radarOffCan):
       self.sm.update(0)
-      op_params = opParams()
       dat = self.sm['radarState'].leadOne
 
       if CS.CP.radarOffCan:

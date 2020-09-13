@@ -188,7 +188,7 @@ class CarInterface(CarInterfaceBase):
     ret.radarTimeStep = 0.02
 
     op_params = opParams()
-    ret.openpilotLongitudinalControl = not (ret.sccBus == 0) and (not ret.radarOffCan or not op_params.get('xps_button_spam'))
+    ret.openpilotLongitudinalControl = not (ret.sccBus == 0)
 
     if candidate in [ CAR.HYUNDAI_GENESIS, CAR.IONIQ_EV_LTD, CAR.IONIQ_HEV, CAR.KONA_EV, CAR.KIA_SORENTO, CAR.SONATA_2019,
                       CAR.KIA_OPTIMA, CAR.VELOSTER, CAR.KIA_STINGER, CAR.GENESIS_G70, CAR.SONATA_HEV, CAR.SANTA_FE, CAR.GENESIS_G80,
@@ -230,7 +230,7 @@ class CarInterface(CarInterfaceBase):
 
     events, events_arne182 = self.create_common_events(ret)
 
-    self.CP.enableCruise = (not self.CP.openpilotLongitudinalControl) or self.CC.usestockscc
+    self.CP.enableCruise = (not self.CP.openpilotLongitudinalControl) or self.CC.usestockscc  and (not ret.radarOffCan or not op_params.get('xps_button_spam'))
     if self.CS.brakeHold and not self.CC.usestockscc:
       events.add(EventName.brakeHold)
     if self.CS.parkBrake and not self.CC.usestockscc:
