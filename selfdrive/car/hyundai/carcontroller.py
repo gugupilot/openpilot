@@ -241,14 +241,14 @@ class CarController():
       self.setspeed = CS.out.cruiseState.speed * speed_unit
 
       if op_params.get('xps_button_spam'):
-        if not CS.radar_obj_valid and dat.status and (dat.vLead < 3. or CS.CP.radarOffCan) \
+        if not CS.radar_obj_valid and dat.status and (dat.vLead < 2.) \
                 and  CS.out.cruiseState.enabled and not CS.out.gasPressed:
           aRel = (dat.vLead**2 - CS.out.vEgo**2)/(2 * dat.dRel)
           print("aRel", aRel)
           if aRel < -.5 or self.stopcontrolupdate:
             self.stopcontrolupdate = True
             print("STOPPED VEHICLE")
-            self.stopspeed = max(self.setspeed - 15, minsetspeed)
+            self.stopspeed = minsetspeed
             if not self.stopcontrolupdate:
               self.button_cnt = 0
               self.recordsetspeed = self.setspeed
