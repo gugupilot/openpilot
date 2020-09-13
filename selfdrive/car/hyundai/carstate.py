@@ -206,7 +206,7 @@ class CarState(CarStateBase):
       else:
         ret.gearShifter = GearShifter.unknown
 
-    if self.CP.fcaBus == -1:
+    if self.CP.fcaBus != -1:
       ret.stockAeb = cp_fca.vl["FCA11"]['FCA_CmdAct'] != 0
       ret.stockFcw = cp_fca.vl["FCA11"]['CF_VSM_Warn'] == 2
     elif not self.CP.radarOffCan:
