@@ -183,7 +183,7 @@ class CarInterface(CarInterfaceBase):
     ret.bsmAvailable = True if 1419 in fingerprint[0] else False
     ret.lfaAvailable = True if 1157 in fingerprint[0] else False
   
-    ret.sccBus = 0 if 1057 in fingerprint[0] else 2 if 1057 in fingerprint[2] else -1
+    ret.sccBus = -1 #0 if 1057 in fingerprint[0] else 2 if 1057 in fingerprint[2] else -1
     ret.radarOffCan = (ret.sccBus == -1)
     ret.radarTimeStep = 0.02
     ret.openpilotLongitudinalControl = not (ret.sccBus == 0)

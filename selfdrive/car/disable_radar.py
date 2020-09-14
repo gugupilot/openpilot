@@ -5,7 +5,7 @@ import cereal.messaging as messaging
 from selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
 from selfdrive.swaglog import cloudlog
 
-RADAR_ADDR = 0x18DAB0F1
+RADAR_ADDR = 0x7D0
 EXT_DIAG_REQUEST = b'\x10\x03'
 EXT_DIAG_RESPONSE = b'\x50\x03'
 COM_CONT_REQUEST = b'\x28\x83\x03'

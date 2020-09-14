@@ -113,8 +113,8 @@ class Controls:
     params.put("CarParams", cp_bytes)
     put_nonblocking("CarParamsCache", cp_bytes)
     put_nonblocking("LongitudinalControl", "1" if self.CP.openpilotLongitudinalControl else "0")
-    if self.CP.openpilotLongitudinalControl and self.CP.safetyModel in [car.CarParams.SafetyModel.hondaBoschGiraffe, car.CarParams.SafetyModel.hondaBoschHarness]:
-      disable_radar(can_sock, pm.sock['sendcan'], 1 if has_relay else 0, timeout=1, retry=10)
+    if 1==1: #self.CP.openpilotLongitudinalControl and self.CP.safetyModel in [car.CarParams.SafetyModel.hondaBoschGiraffe, car.CarParams.SafetyModel.hondaBoschHarness]:
+      disable_radar(can_sock, pm.sock['sendcan'], 2, timeout=1, retry=10)
 
     self.CC = car.CarControl.new_message()
     self.AM = AlertManager()
