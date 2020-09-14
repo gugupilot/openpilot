@@ -92,7 +92,7 @@ class CarController():
     self.params = Params()
 
     if not travis:
-      self.sm = messaging.SubMaster(['liveMapData', 'plan', 'radarState'])
+      self.sm = messaging.SubMaster(['liveMapData', 'radarState'])
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible):
@@ -226,8 +226,6 @@ class CarController():
     if frame % 5 == 0 and self.lfa_available:
       can_sends.append(create_lfa_mfa(self.packer, frame, enabled))
 
-    # Speed Limit Related Stuff  Lot's of comments for others to understand!
-
     if not travis and (self.usestockscc or CS.CP.radarOffCan):
       self.sm.update(0)
       dat = self.sm['radarState'].leadOne
@@ -260,17 +258,14 @@ class CarController():
             self.stopcontrolupdate = False
             self.recordsetspeed = 0
 
+      self.stopcontrolupdate = False
+
       if self.sm['liveMapData'].speedLimitValid and enabled and not self.stopcontrolupdate \
               and CS.out.cruiseState.enabled and op_params.get('xps_button_spam'):
-        self.smartspeed = self.sm['plan'].vCruiseMapd * speed_unit
-        if dat.status and CS.CP.radarOffCan:
-          self.smartspeed = min(self.smartspeed, dat.vLead * speed_unit)
+        self.smartspeed = self.sm['liveMapData'].speedLimit * speed_unit
         self.smartspeed = max(self.smartspeed, minsetspeed)
-
-        print("speed limit  +++++++++++++++++++++++++++++++++++", self.smartspeed)
         if self.smartspeed_old != self.smartspeed:
           self.smartspeedupdate = True
-          print("new smart speed------------------", self.smartspeed)
           self.button_cnt = 0
 
         self.smartspeed_old = self.smartspeed
@@ -279,31 +274,17 @@ class CarController():
         self.smartspeedupdate = False
 
       framestoskip = 10
-
-      if self.stopcontrolupdate:
-        speedtospam = self.stopspeed
-      elif self.smartspeedupdate:
-        speedtospam = self.smartspeed
-      else:
-        speedtospam = self.setspeed
+      speedtospam = self.smartspeed
 
       if (frame - self.last_button_frame) > framestoskip and (self.smartspeedupdate or self.stopcontrolupdate):
         if (self.setspeed > (speedtospam * 1.005)) and (CS.cruise_buttons != 4):
           can_sends.append(create_clu11(self.packer, CS.CP.sccBus, CS.clu11, Buttons.SET_DECEL, self.current_veh_speed, self.button_cnt))
-          if CS.cruise_buttons == 1:
-             self.button_res_stop += 2
-          else:
-             self.button_res_stop -= 1
         elif (self.setspeed < (speedtospam / 1.005)) and (CS.cruise_buttons != 4):
           can_sends.append(create_clu11(self.packer, CS.CP.sccBus, CS.clu11, Buttons.RES_ACCEL, self.current_veh_speed, self.button_cnt))
-          if CS.cruise_buttons == 2:
-             self.button_set_stop += 2
-          else:
-             self.button_set_stop -= 1
         else:
           self.button_res_stop = self.button_set_stop = 0
 
-        if (abs(speedtospam - self.setspeed) < 0.5) or (self.button_res_stop >= 50) or (self.button_set_stop >= 50):
+        if (abs(speedtospam - self.setspeed) < 0.5) or CS.out.gasPressed:
           self.smartspeedupdate = False
           self.stopcontrolupdate = False
 
