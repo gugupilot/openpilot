@@ -167,4 +167,3 @@ def create_scc42a(packer):
   }
   return packer.make_can_msg("FRT_RADAR11", 0, values)
 
-
