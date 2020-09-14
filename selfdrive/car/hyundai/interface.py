@@ -47,7 +47,7 @@ class CarInterface(CarInterfaceBase):
     ret.gasMaxBP = [0., 1., 1.1, 15., 40.]
     ret.gasMaxV = [2., 2., 2., 1.68, 1.3]
     ret.brakeMaxBP = [0., 5., 5.1]
-    ret.brakeMaxV = [5., 5., 3.5]  # safety limits to stop unintended deceleration
+    ret.brakeMaxV = [3.5, 3.5, 3.5]  # safety limits to stop unintended deceleration
     ret.longitudinalTuning.kfBP = [0., 5., 10., 20., 30.]
     ret.longitudinalTuning.kfV = [1., 1., 1., 1., 1.]
 
@@ -227,6 +227,9 @@ class CarInterface(CarInterfaceBase):
     ret_arne182 = arne182.CarStateArne182.new_message()
     ret = self.CS.update(self.cp, self.cp2, self.cp_cam)
     ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
+
+    # speeds
+    ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
 
     events, events_arne182 = self.create_common_events(ret)
 
