@@ -201,7 +201,8 @@ class CarInterface(CarInterfaceBase):
     if ret.radarOffCan or (ret.sccBus == 2):
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunityNonscc
 
-    if ret.mdpsHarness:
+    op_params = opParams()
+    if ret.mdpsHarness or op_params.get('mdps_harness_needed_and_present'):
       ret.minSteerSpeed = 0.
 
     ret.centerToFront = ret.wheelbase * 0.4
