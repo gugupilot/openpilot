@@ -10,7 +10,7 @@ EXT_DIAG_RESPONSE = b'\x50\x03'
 COM_CONT_REQUEST = b'\x28\x83\x03'
 COM_CONT_RESPONSE = b''
 
-def disable_radar(ecu_addr, logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
+def disable_radar(ecu_addr, logcan, sendcan, bus=0, timeout=0.1, retry=5, debug=True):
   print(f"ecu disable {hex(ecu_addr)} ...")
   for i in range(retry):
     try:
@@ -34,5 +34,5 @@ if __name__ == "__main__":
   sendcan = messaging.pub_sock('sendcan')
   logcan = messaging.sub_sock('can')
   time.sleep(1)
-  disabled = disable_ecu(0x18DAB0F1, logcan, sendcan, 1, debug=False)
+  disabled = disable_radar(0x7d0, logcan, sendcan, 0, debug=True)
   print(f"disabled: {disabled}")
