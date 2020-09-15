@@ -183,7 +183,7 @@ class CarInterface(CarInterfaceBase):
     ret.bsmAvailable = True if 1419 in fingerprint[0] else False
     ret.lfaAvailable = True if 1157 in fingerprint[0] else False
   
-    ret.sccBus = -1 #0 if 1057 in fingerprint[0] else 2 if 1057 in fingerprint[2] else -1
+    ret.sccBus = 0 if 1057 in fingerprint[0] else 2 if 1057 in fingerprint[2] else -1
     ret.radarOffCan = (ret.sccBus == -1)
     ret.radarTimeStep = 0.02
     ret.openpilotLongitudinalControl = not (ret.sccBus == 0)
@@ -198,7 +198,7 @@ class CarInterface(CarInterfaceBase):
                           CAR.KIA_CADENZA_HEV, CAR.GRANDEUR_HEV, CAR.KIA_NIRO_HEV, CAR.KONA_HEV]):
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
 
-    if ret.radarOffCan or (ret.sccBus == 2):
+    if ret.sccBus != 0:
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunityNonscc
 
     op_params = opParams()
