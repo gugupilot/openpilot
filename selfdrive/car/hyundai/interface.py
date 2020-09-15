@@ -187,6 +187,8 @@ class CarInterface(CarInterfaceBase):
     ret.radarOffCan = (ret.sccBus == -1)
     ret.radarTimeStep = 0.02
     ret.openpilotLongitudinalControl = not (ret.sccBus == 0)
+    print("mdpsH", ret.mdpsHarness)
+    print("sccbusH", ret.sccBus)
 
     if candidate in [ CAR.HYUNDAI_GENESIS, CAR.IONIQ_EV_LTD, CAR.IONIQ_HEV, CAR.KONA_EV, CAR.KIA_SORENTO, CAR.SONATA_2019,
                       CAR.KIA_OPTIMA, CAR.VELOSTER, CAR.KIA_STINGER, CAR.GENESIS_G70, CAR.SONATA_HEV, CAR.SANTA_FE, CAR.GENESIS_G80,
