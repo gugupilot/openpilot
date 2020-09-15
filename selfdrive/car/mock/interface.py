@@ -36,7 +36,7 @@ class CarInterface(CarInterfaceBase):
   def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):  # pylint: disable=dangerous-default-value
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
     ret.carName = "mock"
-    ret.safetyModel = car.CarParams.SafetyModel.noOutput
+    ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
     ret.mass = 1700.
     ret.rotationalInertia = 2500.
     ret.wheelbase = 2.70
