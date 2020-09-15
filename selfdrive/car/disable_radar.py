@@ -5,7 +5,7 @@ import cereal.messaging as messaging
 from selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
 from selfdrive.swaglog import cloudlog
 
-EXT_DIAG_REQUEST = b'\x10\x03'
+EXT_DIAG_REQUEST = b'\x10\x03\x00\x00\x00\x00\x00'
 EXT_DIAG_RESPONSE = b'\x50\x03'
 COM_CONT_REQUEST = b'\x28\x83\x03'
 TESTER_PRESENT = b'\x02\x3E\x80\x00\x00\x00\x00\x00'
