@@ -8,6 +8,7 @@ from selfdrive.swaglog import cloudlog
 EXT_DIAG_REQUEST = b'\x10\x03'
 EXT_DIAG_RESPONSE = b'\x50\x03'
 COM_CONT_REQUEST = b'\x28\x83\x03'
+TESTER_PRESENT = b'\x3E\x80'
 COM_CONT_RESPONSE = b''
 
 def disable_radar(ecu_addr, logcan, sendcan, bus=2, timeout=0.1, retry=5, debug=False):
@@ -15,8 +16,9 @@ def disable_radar(ecu_addr, logcan, sendcan, bus=2, timeout=0.1, retry=5, debug=
   for i in range(retry):
     try:
       # enter extended diagnostic session
+      query = IsoTpParallelQuery(sendcan, logcan, bus, [ecu_addr], [TESTER_PRESENT], [COM_CONT_RESPONSE], debug=debug)
       query = IsoTpParallelQuery(sendcan, logcan, bus, [ecu_addr], [EXT_DIAG_REQUEST], [EXT_DIAG_RESPONSE], debug=debug)
-      for addr, dat in query.get_data(timeout).items():
+      for ecu_addr, dat in query.get_data(timeout).items():
         print(f"ecu communication control disable tx/rx ...")
         # communication control disable tx and rx
         query = IsoTpParallelQuery(sendcan, logcan, bus, [ecu_addr], [COM_CONT_REQUEST], [COM_CONT_RESPONSE], debug=debug)
