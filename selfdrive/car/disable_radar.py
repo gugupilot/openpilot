@@ -11,7 +11,7 @@ COM_CONT_REQUEST = b'\x28\x83\x03'
 TESTER_PRESENT = b'\x02\x3E\x80\x00\x00\x00\x00\x00'
 COM_CONT_RESPONSE = b''
 
-def disable_radar(ecu_addr, logcan, sendcan, bus=2, timeout=0.1, retry=5, debug=False):
+def disable_radar(ecu_addr, logcan, sendcan, bus=2, timeout=0.1, retry=5, debug=True):
   print(f"ecu disable {hex(ecu_addr)} ...")
   for i in range(retry):
     try:
