@@ -13,6 +13,9 @@ const int HYUNDAI_COMMUNITY_MIN_ACCEL = -300;       // -3.0 m/s2
 const int HYUNDAI_COMMUNITY_ISO_MAX_ACCEL = 200;        // 2.0 m/s2
 const int HYUNDAI_COMMUNITY_ISO_MIN_ACCEL = -350;       // -3.5 m/s2
 
+bool hyundai_community_non_scc_car = true;
+bool hyundai_community_mdps_harness_present = true;
+
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4},// CLU11 Bus 0, 1, 2
@@ -277,6 +280,7 @@ static int hyundai_community_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_f
 
   int bus_fwd = -1;
   int addr = GET_ADDR(to_fwd);
+
   // forward cam to ccan and viceversa, except lkas cmd
   if (!relay_malfunction) {
     if (bus_num == 0) {
@@ -307,7 +311,7 @@ static void hyundai_community_init(int16_t param) {
   UNUSED(param);
   controls_allowed = false;
   hyundai_community_mdps_harness_present = true;
-  hyundai_community_non_scc_car = true;
+  hyundai_community_non_scc_car = false;
   relay_malfunction_reset();
 }
 
