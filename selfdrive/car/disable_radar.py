@@ -17,22 +17,10 @@ COM_CONT_RESPONSE = b''
 
 def disable_radar(logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
   print(f"radar disable {hex(RADAR_ADDR)} ...")
-  for i in range(retry):
-    try:
-      # enter extended diagnostic session
-      query = IsoTpParallelQuery(sendcan, logcan, bus, [RADAR_ADDR], [EXT_DIAG_REQUEST], [EXT_DIAG_RESPONSE], debug=debug)
-      for addr, dat in query.get_data(timeout).items():
-        print("radar communication control disable tx/rx ...")
-        # communication control disable tx and rx
-        query = IsoTpParallelQuery(sendcan, logcan, bus, [RADAR_ADDR], [COM_CONT_REQUEST], [COM_CONT_RESPONSE], debug=debug)
-        query = uds_client.communication_control(CONTROL_TYPE.DISABLE_RX_DISABLE_TX, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
-        query.get_data(0)
-        # messages that work
-        exit(0)
-        return True
-      print(f"radar disable retry ({i+1}) ...")
-    except Exception:
-      cloudlog.warning(f"radar disable exception: {traceback.format_exc()}")
+  panda = Panda()
+  panda.set_safety_mode(Panda.SAFETY_ALLOUTPUT)
+  uds_client = UdsClient(panda, RADAR_ADDR, 0, timeout=0.1, debug=False)
+  uds_client.diagnostic_session_control(SESSION_TYPE.EXTENDED_DIAGNOSTIC)
 
   print("querying addresses ...")
   l = list(range(0x700))
@@ -53,11 +41,6 @@ def disable_radar(logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
 
 
 if __name__ == "__main__":
-  panda = Panda()
-  panda.set_safety_mode(Panda.SAFETY_ALLOUTPUT)
-  uds_client = UdsClient(panda, RADAR_ADDR, 0, timeout=0.1, debug=False)
-  uds_client.diagnostic_session_control(SESSION_TYPE.EXTENDED_DIAGNOSTIC)
-
   import time
   sendcan = messaging.pub_sock('sendcan')
   logcan = messaging.sub_sock('can')
