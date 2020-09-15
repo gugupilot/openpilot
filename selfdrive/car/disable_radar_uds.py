@@ -11,7 +11,7 @@ if __name__ == "__main__":
   panda.set_safety_mode(Panda.SAFETY_ALLOUTPUT)
   uds_client = UdsClient(panda, ADDR, 0, timeout=0.1, debug=True)
   uds_client.diagnostic_session_control(SESSION_TYPE.EXTENDED_DIAGNOSTIC)
-  uds_client.diagnostic_session_control(SESSION_TYPE.DISABLE_RX_DISABLE_TX)
+  uds_client.communication_control(SESSION_TYPE.DISABLE_RX_DISABLE_TX)
   # messages that work
   #data = uds_client.communication_control(CONTROL_TYPE.EXTENDED_DIAGNOSTIC, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
   #data = uds_client.communication_control(CONTROL_TYPE.DISABLE_RX_DISABLE_TX | 0x80, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
@@ -25,7 +25,7 @@ if __name__ == "__main__":
       mt = i & 0xFF
       t.set_description(f"{hex(ct)} - {hex(mt)}")
       try:
-        data = uds_client.communication_control(ct, mt)
+        data = uds_client.diagnostic_session_control(ct, mt)
         print(f"\n{ct} - {mt}: success")
       except NegativeResponseError as e:
         if e.message != "COMMUNICATION_CONTROL - sub-function not supported" and e.message != "COMMUNICATION_CONTROL - request out of range":
