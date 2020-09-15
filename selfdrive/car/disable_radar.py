@@ -5,13 +5,13 @@ import cereal.messaging as messaging
 from selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
 from selfdrive.swaglog import cloudlog
 
-RADAR_ADDR = 0x7ce
+RADAR_ADDR = 0x7d0
 EXT_DIAG_REQUEST = b'\x10\x03'
 EXT_DIAG_RESPONSE = b'\x50\x03'
 COM_CONT_REQUEST = b'\x28\x83\x03'
 COM_CONT_RESPONSE = b''
 
-def disable_radar(logcan, sendcan, bus, timeout=0.1, retry=5, debug=False):
+def disable_radar(logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
   print(f"radar disable {hex(RADAR_ADDR)} ...")
   for i in range(retry):
     try:
