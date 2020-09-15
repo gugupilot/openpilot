@@ -34,6 +34,21 @@ def disable_radar(logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
     except Exception:
       cloudlog.warning(f"radar disable exception: {traceback.format_exc()}")
 
+  print("querying addresses ...")
+  l = list(range(0x700))
+  with tqdm(total=len(l)) as t:
+    for i in l:
+      ct = i >> 8
+      mt = i & 0xFF
+      t.set_description(f"{hex(ct)} - {hex(mt)}")
+      try:
+        data = uds_client.communication_control(ct, mt)
+        print(f"\n{ct} - {mt}: success")
+      except NegativeResponseError as e:
+        if e.message != "COMMUNICATION_CONTROL - sub-function not supported" and e.message != "COMMUNICATION_CONTROL - request out of range":
+          print(f"\n{ct} - {mt}: {e.message}")
+      t.update(1)
+
   return False
 
 
@@ -55,17 +70,3 @@ if __name__ == "__main__":
   #data = uds_client.communication_control(CONTROL_TYPE.DISABLE_RX_DISABLE_TX | 0x80, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
   #exit(0)
 
-  print("querying addresses ...")
-  l = list(range(0x700))
-  with tqdm(total=len(l)) as t:
-    for i in l:
-      ct = i >> 8
-      mt = i & 0xFF
-      t.set_description(f"{hex(ct)} - {hex(mt)}")
-      try:
-        data = uds_client.communication_control(ct, mt)
-        print(f"\n{ct} - {mt}: success")
-      except NegativeResponseError as e:
-        if e.message != "COMMUNICATION_CONTROL - sub-function not supported" and e.message != "COMMUNICATION_CONTROL - request out of range":
-          print(f"\n{ct} - {mt}: {e.message}")
-      t.update(1)
