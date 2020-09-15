@@ -2,8 +2,10 @@
 import traceback
 
 import cereal.messaging as messaging
+from panda import Panda
 from selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
 from selfdrive.swaglog import cloudlog
+from panda.python.uds import UdsClient, NegativeResponseError, SESSION_TYPE, CONTROL_TYPE, MESSAGE_TYPE
 
 EXT_DIAG_REQUEST = b'\x10\x03'
 EXT_DIAG_RESPONSE = b'\x50\x03'
@@ -11,10 +13,14 @@ COM_CONT_REQUEST = b'\x28\x83\x03'
 TESTER_PRESENT = b'\x02\x3E\x80\x00\x00\x00\x00\x00'
 COM_CONT_RESPONSE = b''
 
-def disable_radar(ecu_addr, logcan, sendcan, bus=2, timeout=0.1, retry=5, debug=True):
+def disable_radar(ecu_addr, logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
   print(f"ecu disable {hex(ecu_addr)} ...")
   for i in range(retry):
     try:
+      panda = Panda()
+      panda.set_safety_mode(Panda.SAFETY_ALLOUTPUT)
+      uds_client = UdsClient(panda, ecu_addr, 0, timeout=0.1, debug=True)
+      uds_client.diagnostic_session_control(SESSION_TYPE.CLEAR_DIAGNOSTIC_INFORMATION)
       # enter extended diagnostic session
       #query = IsoTpParallelQuery(sendcan, logcan, bus, [ecu_addr], [COM_CONT_REQUEST], [COM_CONT_RESPONSE], debug=debug)
       query = IsoTpParallelQuery(sendcan, logcan, bus, [ecu_addr], [EXT_DIAG_REQUEST], [EXT_DIAG_RESPONSE], debug=debug)
