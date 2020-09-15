@@ -18,7 +18,7 @@ if __name__ == "__main__":
   #exit(0)
 
   print("querying addresses ...")
-  l = list(range(0x700))
+  l = list(range(0x10000))
   with tqdm(total=len(l)) as t:
     for i in l:
       ct = i >> 8
