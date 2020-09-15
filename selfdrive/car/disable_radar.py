@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 import traceback
 
+from tqdm import tqdm
+
 import cereal.messaging as messaging
+from panda import Panda
+from panda.python.uds import UdsClient, NegativeResponseError, SESSION_TYPE
 from selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
 from selfdrive.swaglog import cloudlog
 
@@ -31,9 +35,34 @@ def disable_radar(logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
 
 
 if __name__ == "__main__":
+  panda = Panda()
+  panda.set_safety_mode(Panda.SAFETY_ALLOUTPUT)
+  uds_client = UdsClient(panda, RADAR_ADDR, bus=1 if panda.has_obd() else 0, timeout=0.1, debug=False)
+  uds_client.diagnostic_session_control(SESSION_TYPE.EXTENDED_DIAGNOSTIC)
+
   import time
   sendcan = messaging.pub_sock('sendcan')
   logcan = messaging.sub_sock('can')
   time.sleep(1)
-  disabled = disable_radar(logcan, sendcan, 1, debug=False)
+  disabled = disable_radar(logcan, sendcan, 0, debug=False)
   print(f"disabled: {disabled}")
+
+  # messages that work
+  #data = uds_client.communication_control(CONTROL_TYPE.DISABLE_RX_DISABLE_TX, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
+  #data = uds_client.communication_control(CONTROL_TYPE.DISABLE_RX_DISABLE_TX | 0x80, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
+  #exit(0)
+
+  print("querying addresses ...")
+  l = list(range(0x700))
+  with tqdm(total=len(l)) as t:
+    for i in l:
+      ct = i >> 8
+      mt = i & 0xFF
+      t.set_description(f"{hex(ct)} - {hex(mt)}")
+      try:
+        data = uds_client.communication_control(ct, mt)
+        print(f"\n{ct} - {mt}: success")
+      except NegativeResponseError as e:
+        if e.message != "COMMUNICATION_CONTROL - sub-function not supported" and e.message != "COMMUNICATION_CONTROL - request out of range":
+          print(f"\n{ct} - {mt}: {e.message}")
+      t.update(1)
