@@ -13,12 +13,12 @@ if __name__ == "__main__":
   uds_client.diagnostic_session_control(SESSION_TYPE.EXTENDED_DIAGNOSTIC)
 
   # messages that work
-  data = uds_client.communication_control(CONTROL_TYPE.DISABLE_RX_DISABLE_TX, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
+  data = uds_client.communication_control(CONTROL_TYPE.EXTENDED_DIAGNOSTIC, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
   data = uds_client.communication_control(CONTROL_TYPE.DISABLE_RX_DISABLE_TX | 0x80, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
   exit(0)
 
   print("querying addresses ...")
-  l = list(range(0x10000))
+  l = list(range(0x700))
   with tqdm(total=len(l)) as t:
     for i in l:
       ct = i >> 8
