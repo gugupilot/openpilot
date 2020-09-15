@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 import cereal.messaging as messaging
 from panda import Panda
-from panda.python.uds import UdsClient, NegativeResponseError, SESSION_TYPE
+from panda.python.uds import UdsClient, NegativeResponseError, SESSION_TYPE, CONTROL_TYPE, MESSAGE_TYPE
 from selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
 from selfdrive.swaglog import cloudlog
 
@@ -25,7 +25,10 @@ def disable_radar(logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
         print("radar communication control disable tx/rx ...")
         # communication control disable tx and rx
         query = IsoTpParallelQuery(sendcan, logcan, bus, [RADAR_ADDR], [COM_CONT_REQUEST], [COM_CONT_RESPONSE], debug=debug)
+        query = uds_client.communication_control(CONTROL_TYPE.DISABLE_RX_DISABLE_TX, MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT)
         query.get_data(0)
+        # messages that work
+        exit(0)
         return True
       print(f"radar disable retry ({i+1}) ...")
     except Exception:
@@ -37,7 +40,7 @@ def disable_radar(logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
 if __name__ == "__main__":
   panda = Panda()
   panda.set_safety_mode(Panda.SAFETY_ALLOUTPUT)
-  uds_client = UdsClient(panda, RADAR_ADDR, bus=1 if panda.has_obd() else 0, timeout=0.1, debug=False)
+  uds_client = UdsClient(panda, RADAR_ADDR, 0, timeout=0.1, debug=False)
   uds_client.diagnostic_session_control(SESSION_TYPE.EXTENDED_DIAGNOSTIC)
 
   import time
