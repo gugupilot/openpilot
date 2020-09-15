@@ -25,7 +25,6 @@ const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {1290, 0, 8}, //   SCC13,  Bus 0
   {905, 0, 8},  //   SCC14,  Bus 0
   {1186, 0, 8}, //   4a2SCC, Bus 0
-  {2000, 0, 8}, {2000, 1, 8}, {2000, 2, 8} //  
  };
 
 // TODO: missing checksum for wheel speeds message,worst failure case is
@@ -193,7 +192,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   int bus = GET_BUS(to_send);
 
   if (!msg_allowed(to_send, HYUNDAI_COMMUNITY_TX_MSGS, sizeof(HYUNDAI_COMMUNITY_TX_MSGS)/sizeof(HYUNDAI_COMMUNITY_TX_MSGS[0]))) {
-    tx = 0;
+    //tx = 0;
   }
 
   if (relay_malfunction) {
