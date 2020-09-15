@@ -18,7 +18,7 @@ def disable_radar(ecu_addr, logcan, sendcan, bus=2, timeout=0.1, retry=5, debug=
       # enter extended diagnostic session
       #query = IsoTpParallelQuery(sendcan, logcan, bus, [ecu_addr], [COM_CONT_REQUEST], [COM_CONT_RESPONSE], debug=debug)
       query = IsoTpParallelQuery(sendcan, logcan, bus, [ecu_addr], [EXT_DIAG_REQUEST], [EXT_DIAG_RESPONSE], debug=debug)
-      for ecu_addr, dat in query.get_data(timeout).items():
+      for addr, dat in query.get_data(timeout).items():
         print(f"ecu communication control disable tx/rx ...")
         # communication control disable tx and rx
         query = IsoTpParallelQuery(sendcan, logcan, bus, [ecu_addr], [COM_CONT_REQUEST], [COM_CONT_RESPONSE], debug=debug)
