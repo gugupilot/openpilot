@@ -1,5 +1,10 @@
 int default_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
-  UNUSED(to_push);
+  int bus = GET_BUS(to_push);
+  int addr = GET_ADDR(to_push);
+
+ if ((bus == 0) && (addr == 593 || addr == 897)) {
+    hyundai_community_mdps_harness_present = false;
+  }
   return true;
 }
 
@@ -24,9 +29,25 @@ static int nooutput_tx_lin_hook(int lin_num, uint8_t *data, int len) {
 }
 
 static int default_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
-  UNUSED(bus_num);
   UNUSED(to_fwd);
-  return -1;
+
+  int bus_fwd = -1;
+  if (bus_num == 0) {
+     if (hyundai_community_mdps_harness_present) {
+       bus_fwd = 12;
+     }
+  }
+  if (bus_num == 1) {
+     if (hyundai_community_mdps_harness_present) {
+       bus_fwd = 20;
+     }
+  }
+  if (bus_num == 2) {
+     if (hyundai_community_mdps_harness_present) {
+       bus_fwd = 10;
+     }
+  }
+  return bus_fwd;
 }
 
 const safety_hooks nooutput_hooks = {

@@ -14,17 +14,19 @@ const int HYUNDAI_COMMUNITY_ISO_MAX_ACCEL = 200;        // 2.0 m/s2
 const int HYUNDAI_COMMUNITY_ISO_MIN_ACCEL = -350;       // -3.5 m/s2
 
 bool hyundai_community_non_scc_car = true;
-bool hyundai_community_mdps_harness_present = true;
+bool aeb_cmd_act = false;
+int prev_desired_accel = 0;
+int decel_not_ramping =0;
 
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4},// CLU11 Bus 0, 1, 2
-  {1157, 0, 4}, // LFAHDA_MFC Bus 0, 1
-  {1056, 0, 8}, //   SCC11,  Bus 0, 1
-  {1057, 0, 8}, //   SCC12,  Bus 0, 1
+  {1157, 0, 4}, // LFAHDA_MFC Bus 0
+  {1056, 0, 8}, //   SCC11,  Bus 0
+  {1057, 0, 8}, //   SCC12,  Bus 0
   {1290, 0, 8}, //   SCC13,  Bus 0
   {905, 0, 8},  //   SCC14,  Bus 0
-  {1186, 0, 8}, //   4a2SCC, Bus 0
+  {1186, 0, 8}  //   4a2SCC, Bus 0
  };
 
 // TODO: missing checksum for wheel speeds message,worst failure case is
@@ -88,8 +90,6 @@ static uint8_t hyundai_community_compute_checksum(CAN_FIFOMailBox_TypeDef *to_pu
   }
   return (16U - (chksum %  16U)) % 16U;
 }
-
-bool aeb_cmd_act = false;
 
 static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
@@ -192,7 +192,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   int bus = GET_BUS(to_send);
 
   if (!msg_allowed(to_send, HYUNDAI_COMMUNITY_TX_MSGS, sizeof(HYUNDAI_COMMUNITY_TX_MSGS)/sizeof(HYUNDAI_COMMUNITY_TX_MSGS[0]))) {
-    //tx = 0;
+    tx = 0;
   }
 
   if (relay_malfunction) {
@@ -200,10 +200,23 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   }
 
   // ACCEL: safety check
+
   if ((addr == 1057) && (bus == 0) && hyundai_community_non_scc_car && (!aeb_cmd_act) && vehicle_moving) {
     int desired_accel = (GET_BYTE(to_send, 3) | ((GET_BYTE(to_send, 4) & 0x7) << 8)) - 1024;
-    if (((desired_accel > 10) || (desired_accel < -10)) && (!controls_allowed)) {
-        tx = 0;
+    prev_desired_accel = desired_accel;
+    if (!controls_allowed) {
+        if (((desired_accel < -10) && (prev_desired_accel >= desired_accel))||  //staying in braking or braking more
+            ((desired_accel > 10) && (prev_desired_accel <= desired_accel)))     //staying in gas or accelerating more
+        {
+           decel_not_ramping +=1;
+        }
+        else
+        {
+           decel_not_ramping =0;
+        }
+        if (decel_not_ramping > 5) {  // allow 5 loops
+            tx = 0;
+        }
     }
     if (controls_allowed) {
       bool vio = (unsafe_mode & UNSAFE_RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX)?
@@ -309,17 +322,14 @@ static int hyundai_community_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_f
 static void hyundai_community_init(int16_t param) {
   UNUSED(param);
   controls_allowed = false;
-  hyundai_community_mdps_harness_present = true;
-  hyundai_community_non_scc_car = false;
   relay_malfunction_reset();
 }
 
 static void hyundai_community_nonscc_init(int16_t param) {
   UNUSED(param);
   controls_allowed = false;
-  hyundai_community_mdps_harness_present = true;
-  hyundai_community_non_scc_car = true;
   relay_malfunction_reset();
+  hyundai_community_non_scc_car = true;
 }
 
 const safety_hooks hyundai_community_hooks = {
