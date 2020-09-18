@@ -415,6 +415,7 @@ struct CarParams {
   bsmAvailable @54: Bool;
   lfaAvailable @55: Bool;
   sccBus @56: Int8;
+  radarDisablePossible @57: Bool;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
