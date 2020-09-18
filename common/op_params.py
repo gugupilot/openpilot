@@ -86,9 +86,9 @@ class opParams:
                         'smart_speed_max_vego': Param(33., VT.number, 'Speed limit to ignore Smartspeed in m/s'),
                         'spairrowtuning': Param(False, bool, 'INDI Tuning for Corolla'),
                         'speed_offset': Param(0, VT.number, 'Speed limit offset in kph/mph', live=True),
-                        'traffic_light_alerts': Param(True, bool, "Switch off the traffic light alerts"),
-                        'traffic_lights': Param(True, bool, "Should Openpilot stop for traffic lights"),
-                        'traffic_lights_without_direction': Param(True, bool, "Should Openpilot stop for traffic lights without a direction specified"),
+                        'traffic_light_alerts': Param(False, bool, "Switch off the traffic light alerts"),
+                        'traffic_lights': Param(False, bool, "Should Openpilot stop for traffic lights"),
+                        'traffic_lights_without_direction': Param(False, bool, "Should Openpilot stop for traffic lights without a direction specified"),
                         'use_car_caching': Param(False, bool, 'Whether to use fingerprint caching'),
                         'min_TR': Param(None, VT.none_or_number, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
                                                                  'The range is limited from 0.85 to 1.3. Set to None to disable', live=True),
