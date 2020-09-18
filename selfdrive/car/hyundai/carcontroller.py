@@ -151,7 +151,7 @@ class CarController():
 
     op_params = opParams()
     if CS.CP.radarOffCan:
-      self.usestockscc = not self.cp_oplongcontrol or op_params.get('xps_button_spam')
+      self.usestockscc = not self.cp_oplongcontrol # or op_params.get('xps_button_spam')
     elif (CS.cancel_button_count == 3) and self.cp_oplongcontrol:
       self.usestockscc = not self.usestockscc
 
