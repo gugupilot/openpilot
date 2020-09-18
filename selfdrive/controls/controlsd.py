@@ -113,8 +113,8 @@ class Controls:
     params.put("CarParams", cp_bytes)
     put_nonblocking("CarParamsCache", cp_bytes)
     put_nonblocking("LongitudinalControl", "1" if self.CP.openpilotLongitudinalControl else "0")
-    if self.CP.openpilotLongitudinalControl:
-      disable_radar(self.can_sock, self.pm.sock['sendcan'], 0)
+    #if self.CP.openpilotLongitudinalControl:
+      #disable_radar(self.can_sock, self.pm.sock['sendcan'], 0)
 
     self.CC = car.CarControl.new_message()
     self.AM = AlertManager()
