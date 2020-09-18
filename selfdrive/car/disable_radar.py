@@ -5,13 +5,13 @@ import cereal.messaging as messaging
 from selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
 from selfdrive.swaglog import cloudlog
 
-EXT_DIAG_REQUEST = b'\x10\x03'
-EXT_DIAG_RESPONSE = b'\x50\x03'
-COM_CONT_REQUEST = b'\x28\x83\x03'
-TESTER_PRESENT = b'\x02\x3E\x80\x00\x00\x00\x00\x00'
+EXT_DIAG_REQUEST = b'\x10\x85'
+EXT_DIAG_RESPONSE = b''
+COM_CONT_REQUEST = b''
+TESTER_PRESENT = b'\x02\x3E\x00\x00\x00\x00\x00\x00'
 COM_CONT_RESPONSE = b''
 
-def disable_radar(ecu_addr, logcan, sendcan, bus, timeout=0.1, retry=5, debug=True):
+def disable_radar(ecu_addr, logcan, sendcan, bus, timeout=1., retry=5, debug=True):
   print(f"ecu disable {hex(ecu_addr)} ...")
   for i in range(retry):
     try:
@@ -36,5 +36,5 @@ if __name__ == "__main__":
   sendcan = messaging.pub_sock('sendcan')
   logcan = messaging.sub_sock('can')
   time.sleep(1)
-  disabled = disable_radar(0x7d0, logcan, sendcan, 2, debug=True)
+  disabled = disable_radar(0x7d0, logcan, sendcan, 0, debug=True)
   print(f"disabled: {disabled}")
