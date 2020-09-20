@@ -19,9 +19,9 @@ int prev_desired_accel = 0;
 int decel_not_ramping =0;
 
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
-  {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
-  {1265, 0, 4}, {1265, 1, 4}, // CLU11 Bus 0, 1
-  {1157, 0, 4}, // LFAHDA_MFC Bus 0
+  {832, 0, 8}, {832, 1, 8},    // LKAS11 Bus 0, 1
+  {1265, 0, 4}, {1265, 1, 4},  // CLU11 Bus 0, 1
+  {1157, 0, 4}                 // LFAHDA_MFC Bus 0
  };
 
 const CanMsg HYUNDAI_COMMUNITY_NONSCC_TX_MSGS[] = {
@@ -32,7 +32,9 @@ const CanMsg HYUNDAI_COMMUNITY_NONSCC_TX_MSGS[] = {
   {1057, 0, 8}, //   SCC12,  Bus 0
   {1290, 0, 8}, //   SCC13,  Bus 0
   {905, 0, 8},  //   SCC14,  Bus 0
-  {1186, 0, 8},  //  4a2SCC, Bus 0
+  {1186, 0, 8}, //  4a2SCC, Bus 0
+  {1155, 0, 8}, //   FCA12, Bus 0
+  {909, 0, 8},  //   FCA11, Bus 0
   {2000, 0, 8}  //   SCC_DIAG, Bus 0
  };
 
