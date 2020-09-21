@@ -226,6 +226,7 @@ class CarInterface(CarInterfaceBase):
 
     params = Params()
     #ret.radarDisablePossible = params.get("IsLdwEnabled", encoding='utf8') == "0"
+    print("ret.safetyModel", ret.safetyModel)
 
     if ret.radarDisablePossible:
       ret.openpilotLongitudinalControl = True
