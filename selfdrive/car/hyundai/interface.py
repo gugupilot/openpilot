@@ -4,7 +4,7 @@ from common import params
 from common.op_params import opParams
 from common.params import Params
 from selfdrive.config import Conversions as CV
-from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, Buttons, HYBRID_VEH
+from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, Buttons
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.controls.lib.events import EventNameArne182
@@ -182,6 +182,11 @@ class CarInterface(CarInterfaceBase):
     ret.fcaBus = 0 if 909 in fingerprint[0] else 2 if 909 in fingerprint[2] else -1
     ret.bsmAvailable = True if 1419 in fingerprint[0] else False
     ret.lfaAvailable = True if 1157 in fingerprint[2] else False
+    ret.lvrAvailable = True if 871 in fingerprint[0] else False
+    ret.evgearAvailable = True if 882 in fingerprint[0] else False
+    ret.emsAvailable = True if 608 and 809 in fingerprint[0] else False
+    ret.clustergearAvailable = True if 1322 in fingerprint[0] else False
+    ret.tcugearAvailable = True if 274 in fingerprint[0] else False
   
     ret.sccBus = 0 if 1057 in fingerprint[0] else 2 if 1057 in fingerprint[2] else -1
     ret.radarOffCan = (ret.sccBus == -1)
