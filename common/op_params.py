@@ -99,7 +99,8 @@ class opParams:
                         'lat_d': Param(9.0, VT.number, 'The lateral derivative gain, default is 9.0 for TSS2 Corolla. This is active at all speeds', live=True),
                         'ludicrous_mode': Param(False, bool, 'Double overall acceleration!'),
                         'xps_button_spam': Param(True, bool, 'enable button spam logic, this will disable OP LONG if enabled!'),
-                        'mdps_harness_needed_and_present': Param(True, bool, 'enable if your car supports steering to 0 after modification for HKG')}
+                        'mdps_harness_needed_and_present': Param(True, bool, 'enable if your car supports steering to 0 after modification for HKG'),
+                        'disableRadarOnCarStartup': Param(False, bool, 'enable Radar disable at the start of car, this will allow op LONG for HKG')}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
