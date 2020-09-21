@@ -151,7 +151,6 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       }
       cruise_engaged_prev = cruise_engaged;
     }
-    controls_allowed = 1;
 
     // engage for non ACC car
     if ((addr == 1265) && hyundai_community_non_scc_car) {
