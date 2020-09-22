@@ -226,7 +226,7 @@ class CarInterface(CarInterfaceBase):
 
     params = Params()
     #ret.radarDisablePossible = params.get("IsLdwEnabled", encoding='utf8') == "0"
-    ret.radarDisablePossible = op_params.get('disableRadarOnCarStartup')
+    ret.radarDisablePossible = op_params.get('disableRadarOnCarStartup') and (ret.sccBus == 0)
     print("ret.safetyModel", ret.safetyModel)
 
     if ret.radarDisablePossible:
