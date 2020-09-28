@@ -2164,11 +2164,11 @@ struct Event {
     wideFrame @74: FrameData;
     modelV2 @75 :ModelDataV2;
 
-    dynamicFollowData @74 :DynamicFollowData;
-    dynamicFollowButton @75 :DynamicFollowButton;
-    laneSpeed @76 :LaneSpeed;
-    laneSpeedButton @77 :LaneSpeedButton;
-    dynamicCameraOffset @78 :DynamicCameraOffset;
-    modelLongButton @79 :ModelLongButton;
+    dynamicFollowData @76 :DynamicFollowData;
+    dynamicFollowButton @77 :DynamicFollowButton;
+    laneSpeed @78 :LaneSpeed;
+    laneSpeedButton @79 :LaneSpeedButton;
+    dynamicCameraOffset @80 :DynamicCameraOffset;
+    modelLongButton @81 :ModelLongButton;
   }
 }

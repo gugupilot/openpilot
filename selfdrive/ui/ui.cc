@@ -78,6 +78,24 @@ static void ui_init_vision(UIState *s) {
   assert(glGetError() == GL_NO_ERROR);
 }
 
+static void send_ls(UIState *s, int status) {
+  capnp::MallocMessageBuilder msg;
+  auto event = msg.initRoot<cereal::Event>();
+  event.setLogMonoTime(nanos_since_boot());
+  auto lsStatus = event.initLaneSpeedButton();
+  lsStatus.setStatus(status);
+  s->pm->send("laneSpeedButton", msg);
+}
+
+static void send_df(UIState *s, int status) {
+  capnp::MallocMessageBuilder msg;
+  auto event = msg.initRoot<cereal::Event>();
+  event.setLogMonoTime(nanos_since_boot());
+  auto dfStatus = event.initDynamicFollowButton();
+  dfStatus.setStatus(status);
+  s->pm->send("dynamicFollowButton", msg);
+}
+
 static void send_ml(UIState *s, bool enabled) {
   capnp::MallocMessageBuilder msg;
   auto event = msg.initRoot<cereal::Event>();
@@ -141,8 +159,6 @@ static bool handle_SA_touched(UIState *s, int touch_x, int touch_y) {
   }
   return false;
 }
-
-
 
 void ui_update_vision(UIState *s) {
 
