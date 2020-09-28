@@ -9,6 +9,8 @@ from selfdrive.config import Conversions as CV
 from common.params import Params
 import cereal.messaging as messaging
 from cereal import log
+from common.op_params import opParams
+
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
@@ -62,6 +64,9 @@ class PathPlanner():
     self.lane_change_ll_prob = 1.0
     self.prev_one_blinker = False
     self.pre_auto_LCA_timer = 0.0
+    self.op_params = opParams()
+    self.alca_nudge_required = self.op_params.get('alca_nudge_required')
+    self.alca_min_speed = self.op_params.get('alca_min_speed') * CV.MPH_TO_MS
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -100,7 +105,8 @@ class PathPlanner():
 
     # Lane change logic
     one_blinker = sm['carState'].leftBlinker != sm['carState'].rightBlinker
-    below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN
+    below_lane_change_speed = v_ego < self.alca_min_speed
+
 
     if sm['carState'].leftBlinker:
       self.lane_change_direction = LaneChangeDirection.left
@@ -175,7 +181,7 @@ class PathPlanner():
     else:
       self.libmpc.init_weights(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
 
-    self.LP.update_d_poly(v_ego)
+    self.LP.update_d_poly(v_ego, angle_steers, active)
 
     # account for actuation delay
     self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, VM.sR, CP.steerActuatorDelay)
