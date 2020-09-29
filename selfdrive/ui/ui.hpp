@@ -142,9 +142,6 @@ typedef struct UIScene {
   // ip addr
   char ipAddr[20];
   
-  int dfButtonStatus;
-  int lsButtonStatus;
-  bool mlButtonEnabled;
 
   cereal::HealthData::HwType hwType;
   int satelliteCount;
