@@ -117,32 +117,25 @@ class LongControl():
       prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
 
-      output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target,
-                                  freeze_integrator=prevent_overshoot, leadvisible=hasLead, leaddistance=dRel, leadvel=vLead)
+      output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
+
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
 
     # Intention is to stop, switch to a different brake control until we stop
     elif self.long_control_state == LongCtrlState.stopping:
       # Keep applying brakes until the car is stopped
-      factor = 1.
-      if hasLead:
-        factor = interp(dRel, [2., 3., 4., 5., 6., 7., 8.], [5., 2.5, 1., .5, .25, .05, .005])
-      if output_gb > -BRAKE_STOPPING_TARGET:
-        output_gb -= (STOPPING_BRAKE_RATE * factor) / RATE
-      if output_gb < -.5 and CS.standstill:
-        output_gb += .0033
+      if not CS.standstill or output_gb > -BRAKE_STOPPING_TARGET:
+        output_gb -= STOPPING_BRAKE_RATE / RATE
       output_gb = clip(output_gb, -brake_max, gas_max)
+
       self.v_pid = CS.vEgo
       self.pid.reset()
 
     # Intention is to move again, release brake fast before handing control to PID
     elif self.long_control_state == LongCtrlState.starting:
-      factor = 1.
-      if hasLead:
-        factor = interp(dRel, [0., 2., 4., 6.], [2., 2., 2., 3.])
-      if output_gb < 2.:
-        output_gb += (STARTING_BRAKE_RATE * factor) / RATE
+      if output_gb < -0.2:
+        output_gb += STARTING_BRAKE_RATE / RATE
       self.v_pid = CS.vEgo
       self.pid.reset()
 
