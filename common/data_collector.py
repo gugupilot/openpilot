@@ -1,4 +1,3 @@
-from common.travis_checker import travis
 from selfdrive.swaglog import cloudlog
 from common.realtime import sec_since_boot
 from common.op_params import opParams
@@ -33,7 +32,7 @@ class DataCollector:
     self._initialize()
 
   def _initialize(self):  # add keys to top of data file
-    if not os.path.exists(self.file_path) and not travis:
+    if not os.path.exists(self.file_path):
       with open(self.file_path, "w") as f:
         f.write('{}\n'.format(self.keys))
 
@@ -72,7 +71,7 @@ class DataCollector:
     something is wrong with writing.
     """
 
-    if (sec_since_boot() - self.last_write_time) >= self.write_frequency and len(self.data) >= self.write_threshold and not travis:
+    if (sec_since_boot() - self.last_write_time) >= self.write_frequency and len(self.data) >= self.write_threshold:
       if not self.thread_running:
         write_thread = threading.Thread(target=self._write, args=(self.data,))
         write_thread.daemon = True
