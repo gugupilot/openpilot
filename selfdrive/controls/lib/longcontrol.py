@@ -94,20 +94,7 @@ class LongControl():
 
     # Update state machine
     output_gb = self.last_output_gb
-    if radarState is None:
-      dRel = 200
-      vLead = 0
-    else:
-      dRel = radarState.leadOne.dRel
-      vLead = radarState.leadOne.vLead
-    if hasLead and dRel < 5. and radarState.leadOne.status:
-      self.stop = True
-      if self.stop:
-        self.stop_timer = 100
-    elif self.stop_timer > 0:
-      self.stop_timer -= 1
-    else:
-      self.stop = False
+
     self.long_control_state = long_control_state_trans(active, self.long_control_state, CS.vEgo,
                                                        v_target_future, self.v_pid, output_gb,
                                                        CS.brakePressed, CS.standstill, self.stop)
