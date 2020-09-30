@@ -7,7 +7,7 @@ from cereal.messaging import SubMaster, PubMaster
 from selfdrive.config import Conversions as CV
 from common.realtime import sec_since_boot
 
-STANDARD_CAMERA_OFFSET = 0.06
+CAMERA_OFFSET = 0.06
 
 def compute_path_pinv(l=50):
   deg = 3
