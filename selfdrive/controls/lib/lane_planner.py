@@ -198,7 +198,6 @@ class LanePlanner():
 
     self._path_pinv = compute_path_pinv()
     self.x_points = np.arange(50)
-    self.dynamic_camera_offset = DynamicCameraOffset()
 
 
   def parse_model(self, md):
@@ -218,11 +217,8 @@ class LanePlanner():
       self.r_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeRight - 1]
 
   def update_d_poly(self, v_ego, angle_steers, active):
-    # only offset left and right lane lines; offsetting p_poly does not make sense since it's already offset from the model
-    CAMERA_OFFSET = self.dynamic_camera_offset.update(v_ego, active, angle_steers, self.lane_width, self.lane_width_certainty, [self.l_poly, self.r_poly], [self.l_prob, self.r_prob])
     self.l_poly[3] += CAMERA_OFFSET
     self.r_poly[3] += CAMERA_OFFSET
-    self.p_poly[3] += CAMERA_OFFSET - STANDARD_CAMERA_OFFSET  # only offst path based on difference of new offset and standard
 
 
     # Find current lanewidth
