@@ -103,6 +103,13 @@ bool brake_pressed_prev = false;
 bool cruise_engaged_prev = false;
 float vehicle_speed = 0;
 bool vehicle_moving = false;
+bool hyundai_community_mdps_harness_present = true;
+
+//type = 0 is no mdps harness, type 0 is not necessary to set
+//type = 1 is mdps harness connected directly to can1 replacing lcan
+//type = 2 is mdps harness connected to obd/comma power
+int hyundai_community_mdps_harness_type = 1;
+
 
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
@@ -132,7 +139,7 @@ struct sample_t angle_meas;         // last 3 steer angles
 // See ISO 15622:2018 for more information.
 #define UNSAFE_RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX 7
 
-int unsafe_mode = 0;
+int unsafe_mode = 1;
 
 // time since safety mode has been changed
 uint32_t safety_mode_cnt = 0U;

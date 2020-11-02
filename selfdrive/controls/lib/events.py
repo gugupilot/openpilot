@@ -286,9 +286,9 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.startup: {
     ET.PERMANENT: Alert(
       "Be ready to take over at any time",
-      "Do not forget to PRAY!",
+      "Always keep hands on wheel and eyes on road",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 7.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 1.),
   },
 
   EventName.startupMaster: {
@@ -296,7 +296,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "WARNING: This branch is not tested",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 1.),
   },
 
   EventName.startupNoControl: {
@@ -352,7 +352,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.carUnrecognized: {
     ET.PERMANENT: Alert(
       "Dashcam Mode",
-      "Car Unrecognized",
+      "Car Unrecognized- Please verify fingerprint with the fork owner",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
@@ -387,6 +387,14 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Lane Departure Detected",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 3.),
+  },
+
+  EventName.visiononlyWarning: {
+    ET.PERMANENT: Alert(
+      "Vision Only, Stock AEB/SCC Disabled",
+      "Be Cautious",
+      AlertStatus.userPrompt, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeDingRepeat, 1., 2., 15.),
   },
 
   # ********** events only containing alerts that display while engaged **********
@@ -511,12 +519,16 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
     ET.WARNING: below_steer_speed_alert,
   },
 
+  EventName.belowSteerSpeedDing: {
+    ET.WARNING: EngagementAlert(AudibleAlert.chimeDing),
+  },
+
   EventName.preLaneChangeLeft: {
     ET.WARNING: Alert(
       "Steer Left to Start Lane Change",
       "Monitor Other Vehicles",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
   },
 
   EventName.preLaneChangeRight: {
@@ -524,7 +536,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Steer Right to Start Lane Change",
       "Monitor Other Vehicles",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
   },
 
   EventName.laneChangeBlocked: {
@@ -532,7 +544,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Car Detected in Blindspot",
       "Monitor Other Vehicles",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1),
   },
 
   EventName.laneChange: {
@@ -540,7 +552,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Changing Lane",
       "Monitor Other Vehicles",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1),
   },
 
   EventName.steerSaturated: {
@@ -548,7 +560,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "TAKE CONTROL",
       "Turn Exceeds Steering Limit",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 3.),
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 1., 1.),
   },
 
   # ********** events that affect controls state transitions **********
@@ -570,7 +582,6 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.brakeHold: {
-    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
     ET.NO_ENTRY: NoEntryAlert("Brake Hold Active"),
   },
 
@@ -663,8 +674,8 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.wrongGear: {
-    ET.SOFT_DISABLE: SoftDisableAlert("Gear not D"),
-    ET.NO_ENTRY: NoEntryAlert("Gear not D"),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.NO_ENTRY: NoEntryAlert("Shift Gear to Drive"),
   },
 
   EventName.calibrationInvalid: {
@@ -684,13 +695,13 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.doorOpen: {
-    ET.SOFT_DISABLE: SoftDisableAlert("Door Open"),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
     ET.NO_ENTRY: NoEntryAlert("Door open"),
   },
 
   EventName.seatbeltNotLatched: {
     ET.SOFT_DISABLE: SoftDisableAlert("Seatbelt Unlatched"),
-    ET.NO_ENTRY: NoEntryAlert("Seatbelt unlatched"),
+    ET.NO_ENTRY: NoEntryAlert("Seatbelt Unlatched"),
   },
 
   EventName.espDisabled: {
@@ -800,13 +811,8 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.reverseGear: {
-    ET.PERMANENT: Alert(
-      "Reverse\nGear",
-      "",
-      AlertStatus.normal, AlertSize.full,
-      Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=0.5),
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Reverse Gear"),
-    ET.NO_ENTRY: NoEntryAlert("Reverse Gear"),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.NO_ENTRY: NoEntryAlert("Shift Gear to Drive"),
   },
 
   EventName.cruiseDisabled: {

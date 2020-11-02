@@ -106,6 +106,8 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     promptKeepHandsOnWheel @91;
     keepHandsOnWheel @92;
     deviceFalling @93;
+    visiononlyWarning @ 94;
+    belowSteerSpeedDing @ 95;
 
     dataNeededDEPRECATED @16;
     modelCommIssueDEPRECATED @27;
@@ -313,6 +315,9 @@ struct CarControl {
     leftLaneVisible @7: Bool;
     rightLaneDepart @8: Bool;
     leftLaneDepart @9: Bool;
+    leadDistance @10:Float32;
+    leadvRel @11:Float32;
+    leadyRel @12:Float32;
 
     enum VisualAlert {
       # these are the choices from the Honda
@@ -339,6 +344,8 @@ struct CarControl {
       chimeWarningRepeat @6;
       chimePrompt @7;
       chimeWarning2Repeat @8;
+      chimeDing @9;
+      chimeDingRepeat @ 10;
     }
   }
 }
@@ -410,6 +417,16 @@ struct CarParams {
   communityFeature @46: Bool;  # true if a community maintained feature is detected
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
+  mdpsHarness @51: Bool;
+  sasBus @52: Int8;
+  fcaBus @53: Int8;
+  bsmAvailable @54: Bool;
+  lfaAvailable @55: Bool;
+  sccBus @56: Int8;
+  radarDisablePossible @57: Bool;
+  lvrAvailable @58: Bool;
+  evgearAvailable @59: Bool;
+  emsAvailable @60: Bool;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
@@ -486,6 +503,7 @@ struct CarParams {
     subaruLegacy @22;  # pre-Global platform
     hyundaiLegacy @23;
     hyundaiCommunity @24;
+    hyundaiCommunityNonscc @25;
   }
 
   enum SteerControlType {
