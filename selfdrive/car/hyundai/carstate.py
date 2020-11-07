@@ -1,6 +1,5 @@
 import copy
 from cereal import car
-from common.params import Params
 from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, ELEC_VEH, HYBRID_VEH
 from selfdrive.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
@@ -17,6 +16,7 @@ class CarState(CarStateBase):
     self.cruise_main_button = 0
     self.cruise_buttons = 0
     self.allow_nonscc_available = False
+    self.lkasstate = 0
   
     self.lead_distance = 150.
     self.radar_obj_valid = 0.
@@ -35,6 +35,7 @@ class CarState(CarStateBase):
 
     self.prev_cruise_buttons = self.cruise_buttons
     self.prev_cruise_main_button = self.cruise_main_button
+    self.prev_lkasstate = self.lkasstate
 
     ret = car.CarState.new_message()
 
@@ -208,6 +209,9 @@ class CarState(CarStateBase):
       ret.leftBlindspot = cp.vl["LCA11"]["CF_Lca_IndLeft"] != 0
       ret.rightBlindspot = cp.vl["LCA11"]["CF_Lca_IndRight"] != 0
 
+    self.lkasstate = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"]
+    self.lkasbutton = self.lkasstate != self.prev_lkasstate and (self.lkasstate == 0 or self.prev_lkasstate == 0)
+
     # save the entire LKAS11, CLU11, SCC12 and MDPS12
     self.lkas11 = copy.copy(cp_cam.vl["LKAS11"])
     self.clu11 = copy.copy(cp.vl["CLU11"])
@@ -216,6 +220,7 @@ class CarState(CarStateBase):
     self.scc13 = copy.copy(cp_scc.vl["SCC13"])
     self.scc14 = copy.copy(cp_scc.vl["SCC14"])
     self.fca11 = copy.copy(cp_fca.vl["FCA11"])
+    self.mdps12 = copy.copy(cp_mdps.vl["MDPS12"])
 
     self.scc11init = copy.copy(cp.vl["SCC11"])
     self.scc12init = copy.copy(cp.vl["SCC12"])
