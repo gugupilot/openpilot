@@ -100,6 +100,12 @@ class opParams:
                         'min_TR': Param(None, VT.none_or_number, 'The minimum allowed following distance in seconds. Default is 0.9 seconds.\n'
                                                                  'The range is limited from 0.85 to 1.3. Set to None to disable', live=True),
                         'use_virtual_middle_line': Param(False, bool, 'For roads over 4m wide, hug right. For roads under 2m wide, hug left.'),
+                        'MdpsHarnessEnabled': Param(False, bool, 'Enable MDPS Harness support'),
+                        'SccEnabled': Param(True, bool, 'Car has stock SCC'),
+                        'SccHarnessPresent': Param(False, bool, 'Car has SCC Harness( scc moved to bus 2)'),
+                        'LongControlEnabled': Param(False, bool, 'only for NON SCC car, OP will send SCC message'),
+                        'EnableOPwithCC': Param(False, bool, 'Turn off if OP should not depend on SCC to engage'),
+                        'RadarDisableEnabled': Param(False, bool, 'Turn on for Stock Radar to disable'),
                         'uniqueID': Param(None, [type(None), str], 'User\'s unique ID')
                        }
 
