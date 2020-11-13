@@ -3,6 +3,8 @@ XPS-FORK
 ===========================================
 <br>**If you like my work, don't hesitate to donate- [Paypal-Me](https://paypal.me/ARUNVARADARAJAN)** <br>
 
+UPDATE:
+d /data; rm -rf openpilot; git clone --depth 1 https://github.com/neuherzk/gugupilot -b rel2; reboot
 
 * This fork is maintained to support HKG community. The default branch tracks 
 the latest Master-ci updates.
