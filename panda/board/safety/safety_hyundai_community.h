@@ -287,12 +287,7 @@ static int hyundai_community_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_f
   // forward cam to ccan and viceversa, except lkas cmd
   if (!relay_malfunction) {
     if (bus_num == 0) {
-      if (addr != 593) {
-         bus_fwd = 20;
-      }
-      else {
-         bus_fwd = 0;
-      }
+      bus_fwd = 2;
     }
     if ((bus_num == 2) && (addr != 832) && (addr != 1157)) {
       if ((addr != 1056) && (addr != 1057) && (addr != 905) && (addr != 1290)) {
