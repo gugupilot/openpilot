@@ -71,6 +71,7 @@ class opParams:
                         'InnerLoopGain': Param(2.1, VT.number, 'Over correction'),
                         'RCTimeConstant': Param(1.4, VT.number, 'Time constant'),
                         'ActuatorEffectiveness': Param(2., VT.number, 'Sensitivity of the actuator, increase for less pingpong, decrease if weak steering'),
+                        'smartMDPS': Param(True, bool, 'Toggle to enable smart MDPS'),
                         }
 
 
