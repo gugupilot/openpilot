@@ -307,7 +307,8 @@ void fill_xyzt(cereal::ModelDataV2::XYZTData::Builder xyzt, const float * data,
 
 void model_publish_v2(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
                      uint32_t vipc_dropped_frames, float frame_drop,
-                     const ModelDataRaw &net_outputs, uint64_t timestamp_eof) {
+                     const ModelDataRaw &net_outputs, uint64_t timestamp_eof,
+                     float model_execution_time) {
   // make msg
   MessageBuilder msg;
   auto framed = msg.initEvent(frame_drop < MAX_FRAME_DROP).initModelV2();
@@ -316,6 +317,7 @@ void model_publish_v2(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
   framed.setFrameAge(frame_age);
   framed.setFrameDropPerc(frame_drop * 100);
   framed.setTimestampEof(timestamp_eof);
+  framed.setModelExecutionTime(model_execution_time);
 
   // plan 
   int plan_mhp_max_idx = 0;
@@ -323,14 +325,6 @@ void model_publish_v2(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
     if (net_outputs.plan[(i + 1)*(PLAN_MHP_GROUP_SIZE) - 1] >
         net_outputs.plan[(plan_mhp_max_idx + 1)*(PLAN_MHP_GROUP_SIZE) - 1]) {
       plan_mhp_max_idx = i;
-    }
-  }
-  float valid_len = net_outputs.plan[plan_mhp_max_idx*(PLAN_MHP_GROUP_SIZE) + 30*32];
-  valid_len = fmin(MODEL_PATH_DISTANCE, fmax(MIN_VALID_LEN, valid_len));
-  int valid_len_idx = 0;
-  for (int i=1; i<TRAJECTORY_SIZE; i++) {
-    if (valid_len >= X_IDXS[valid_len_idx]){
-      valid_len_idx = i;
     }
   }
 
@@ -342,12 +336,12 @@ void model_publish_v2(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
 
   auto position = framed.initPosition();
   fill_xyzt(position, best_plan, PLAN_MHP_COLUMNS, 0, plan_t_arr);
-  auto orientation = framed.initOrientation();
-  fill_xyzt(orientation, best_plan, PLAN_MHP_COLUMNS, 3, plan_t_arr);
   auto velocity = framed.initVelocity();
-  fill_xyzt(velocity, best_plan, PLAN_MHP_COLUMNS, 6, plan_t_arr);
+  fill_xyzt(velocity, best_plan, PLAN_MHP_COLUMNS, 3, plan_t_arr);
+  auto orientation = framed.initOrientation();
+  fill_xyzt(orientation, best_plan, PLAN_MHP_COLUMNS, 9, plan_t_arr);
   auto orientation_rate = framed.initOrientationRate();
-  fill_xyzt(orientation_rate, best_plan, PLAN_MHP_COLUMNS, 9, plan_t_arr);
+  fill_xyzt(orientation_rate, best_plan, PLAN_MHP_COLUMNS, 12, plan_t_arr);
 
   // lane lines
   auto lane_lines = framed.initLaneLines(4);
@@ -393,15 +387,18 @@ void model_publish_v2(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
 }
 
 void model_publish(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
-                   uint32_t vipc_dropped_frames, float frame_drop, const ModelDataRaw &net_outputs, uint64_t timestamp_eof) {
-  uint32_t frame_age = (frame_id > vipc_frame_id) ? (frame_id - vipc_frame_id) : 0;
+                   uint32_t vipc_dropped_frames, float frame_drop,
+                   const ModelDataRaw &net_outputs, uint64_t timestamp_eof,
+                   float model_execution_time) {
 
+  uint32_t frame_age = (frame_id > vipc_frame_id) ? (frame_id - vipc_frame_id) : 0;
   MessageBuilder msg;
   auto framed = msg.initEvent(frame_drop < MAX_FRAME_DROP).initModel();
   framed.setFrameId(vipc_frame_id);
   framed.setFrameAge(frame_age);
   framed.setFrameDropPerc(frame_drop * 100);
   framed.setTimestampEof(timestamp_eof);
+  framed.setModelExecutionTime(model_execution_time);
 
   // Find the distribution that corresponds to the most probable plan
   int plan_mhp_max_idx = 0;
@@ -411,9 +408,17 @@ void model_publish(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
       plan_mhp_max_idx = i;
     }
   }
+
   // x pos at 10s is a good valid_len
-  float valid_len = net_outputs.plan[plan_mhp_max_idx*(PLAN_MHP_GROUP_SIZE) + 30*32];
-  // clamp to 5 and MODEL_PATH_DISTANCE
+  float valid_len = 0;
+  float valid_len_candidate;
+  for (int i=1; i<TRAJECTORY_SIZE; i++) {
+    valid_len_candidate = net_outputs.plan[plan_mhp_max_idx*(PLAN_MHP_GROUP_SIZE) + 30*i];
+    if (valid_len_candidate >= valid_len){
+      valid_len = valid_len_candidate;
+    }
+  }
+  // clamp to 10 and MODEL_PATH_DISTANCE
   valid_len = fmin(MODEL_PATH_DISTANCE, fmax(MIN_VALID_LEN, valid_len));
   int valid_len_idx = 0;
   for (int i=1; i<TRAJECTORY_SIZE; i++) {
@@ -461,7 +466,8 @@ void model_publish(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
 }
 
 void posenet_publish(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
-                     uint32_t vipc_dropped_frames, float frame_drop, const ModelDataRaw &net_outputs, uint64_t timestamp_eof) {
+                     uint32_t vipc_dropped_frames, float frame_drop,
+                     const ModelDataRaw &net_outputs, uint64_t timestamp_eof) {
   float trans_arr[3];
   float trans_std_arr[3];
   float rot_arr[3];
