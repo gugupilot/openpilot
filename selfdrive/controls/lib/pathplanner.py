@@ -23,7 +23,7 @@ LANE_CHANGE_SPEED_MIN = 35 * CV.MPH_TO_MS
 LANE_CHANGE_TIME_MAX = 10.
 
 sadBP = [0., 5., 10., 25.]
-sadV = [.5, .5, .3, .1]
+sadV = [.3, .3, .2, .1]
 
 DESIRES = {
   LaneChangeDirection.none: {
