@@ -670,7 +670,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
     char uom_str[6];
     NVGcolor val_color = COLOR_WHITE_ALPHA(200);
     if (scene->controls_state.getEnabled()) {
-      snprintf(val_str, sizeof(val_str), "%.2f",(99));
+      snprintf(val_str, sizeof(val_str), "%.2f",(0.0));
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }
