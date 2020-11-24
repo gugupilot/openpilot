@@ -329,7 +329,7 @@ static void ui_draw_vision_maxspeed(UIState *s) {
 
 static void ui_draw_vision_speed(UIState *s) {
   const Rect &viz_rect = s->scene.viz_rect;
-  const UIScene *scene = &s->scene;
+//  const UIScene *scene = &s->scene;
   float v_ego = s->scene.controls_state.getVEgo();
   float speed = v_ego * 2.2369363 + 0.5;
   if (s->is_metric){
