@@ -143,11 +143,16 @@ void update_sockets(UIState *s) {
       s->status = STATUS_WARNING;
     } else if (alertStatus == cereal::ControlsState::AlertStatus::CRITICAL) {
       s->status = STATUS_ALERT;
+/*
     } else if (scene.controls_state.getEnabled()){
       s->status = (s->longitudinal_control)? STATUS_ENGAGED_OPLONG:STATUS_ENGAGED;
     }
     else {
       s->status = STATUS_DISENGAGED;
+    }
+*/
+    } else{
+      s->status = scene.controls_state.getEnabled() ? STATUS_ENGAGED : STATUS_DISENGAGED;
     }
 
     float alert_blinkingrate = scene.controls_state.getAlertBlinkingRate();
@@ -168,12 +173,12 @@ void update_sockets(UIState *s) {
       }
     }
   }
-/*
+
   if (sm.updated("liveParameters")) {
     auto data = sm["liveParameters"].getLiveParameters();    
     s->scene.steerRatio=data.getSteerRatio();
   }
-*/
+
   if (sm.updated("radarState")) {
     auto data = sm["radarState"].getRadarState();
     scene.lead_data[0] = data.getLeadOne();
