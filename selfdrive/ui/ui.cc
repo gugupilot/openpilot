@@ -160,13 +160,19 @@ void update_sockets(UIState *s) {
       }
     }
   }
+
+  if (sm.updated("liveParameters")) {
+    auto data = sm["liveParameters"].getLiveParameters();    
+    s->scene.steerRatio=data.getSteerRatio();
+  }
+  
   if (sm.updated("radarState")) {
     auto data = sm["radarState"].getRadarState();
     scene.lead_data[0] = data.getLeadOne();
     scene.lead_data[1] = data.getLeadTwo();
-    scene.lead_v_rel = scene.lead_data[0].getVRel();
-    scene.lead_d_rel = scene.lead_data[0].getDRel();
-    scene.lead_status = scene.lead_data[0].getStatus();
+    s->scene.lead_v_rel = scene.lead_data[0].getVRel();
+    s->scene.lead_d_rel = scene.lead_data[0].getDRel();
+    s->scene.lead_status = scene.lead_data[0].getStatus();
   }
   if (sm.updated("liveCalibration")) {
     scene.world_objects_visible = true;
