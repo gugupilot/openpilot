@@ -329,7 +329,7 @@ static void ui_draw_vision_maxspeed(UIState *s) {
 
 static void ui_draw_vision_speed(UIState *s) {
   const Rect &viz_rect = s->scene.viz_rect;
-//  const UIScene *scene = &s->scene;
+  const UIScene *scene = &s->scene;
   float v_ego = s->scene.controls_state.getVEgo();
   float speed = v_ego * 2.2369363 + 0.5;
   if (s->is_metric){
@@ -339,8 +339,48 @@ static void ui_draw_vision_speed(UIState *s) {
   const int viz_speed_x = viz_rect.centerX() - viz_speed_w/2;
   char speed_str[32];
 
-  nvgBeginPath(s->vg);
-  nvgRect(s->vg, viz_speed_x, viz_rect.y, viz_speed_w, header_h);
+  // turning blinker from kegman
+  if(scene->leftBlinker) {
+    nvgBeginPath(s->vg);
+    nvgMoveTo(s->vg, viz_speed_x, viz_rect.y + header_h/4);
+    nvgLineTo(s->vg, viz_speed_x - viz_speed_w/2, viz_rect.y + header_h/4 + header_h/4);
+    nvgLineTo(s->vg, viz_speed_x, viz_rect.y + header_h/2 + header_h/4);
+    nvgClosePath(s->vg);
+    nvgFillColor(s->vg, nvgRGBA(23,134,68,scene->blinker_blinkingrate>=50?210:60));
+    nvgFill(s->vg);
+  }
+  if(scene->rightBlinker) {
+    nvgBeginPath(s->vg);
+    nvgMoveTo(s->vg, viz_speed_x+viz_speed_w, viz_rect.y + header_h/4);
+    nvgLineTo(s->vg, viz_speed_x+viz_speed_w + viz_speed_w/2, viz_rect.y + header_h/4 + header_h/4);
+    nvgLineTo(s->vg, viz_speed_x+viz_speed_w, viz_rect.y + header_h/2 + header_h/4);
+    nvgClosePath(s->vg);
+    nvgFillColor(s->vg, nvgRGBA(23,134,68,scene->blinker_blinkingrate>=50?210:60));
+    nvgFill(s->vg);
+    }
+  if(scene->leftBlinker || scene->rightBlinker) {
+    s->scene.blinker_blinkingrate -= 3;
+    if(scene->blinker_blinkingrate<0) s->scene.blinker_blinkingrate = 120;
+  }
+  if(scene->leftblindspot) {
+    nvgBeginPath(s->vg);
+    nvgMoveTo(s->vg, viz_speed_x, viz_rect.y + header_h/4);
+    nvgLineTo(s->vg, viz_speed_x - viz_speed_w/2, viz_rect.y + header_h/4 + header_h/4);
+    nvgLineTo(s->vg, viz_speed_x, viz_rect.y + header_h/2 + header_h/4);
+    nvgClosePath(s->vg);
+    nvgFillColor(s->vg, nvgRGBA(23,0,0,210));
+    nvgFill(s->vg);
+  }
+  if(scene->rightblindspot) {
+    nvgBeginPath(s->vg);
+    nvgMoveTo(s->vg, viz_speed_x+viz_speed_w, viz_rect.y + header_h/4);
+    nvgLineTo(s->vg, viz_speed_x+viz_speed_w + viz_speed_w/2, viz_rect.y + header_h/4 + header_h/4);
+    nvgLineTo(s->vg, viz_speed_x+viz_speed_w, viz_rect.y + header_h/2 + header_h/4);
+    nvgClosePath(s->vg);
+    nvgFillColor(s->vg, nvgRGBA(23,0,0,210));
+    nvgFill(s->vg);
+    }
+
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
 
   snprintf(speed_str, sizeof(speed_str), "%d", (int)speed);
@@ -461,7 +501,7 @@ static void ui_draw_driver_view(UIState *s) {
 }
 
 static void ui_draw_vision_brake(UIState *s) {
-//  const UIScene *scene = &s->scene;
+  const UIScene *scene = &s->scene;
   const Rect &viz_rect = s->scene.viz_rect;
   const int brake_size = 96;
   const int brake_x = (viz_rect.x + (brake_size * 3) + (bdr_s * 4));
@@ -470,7 +510,7 @@ static void ui_draw_vision_brake(UIState *s) {
   const int brake_img_x = (brake_x - (brake_img_size / 2));
   const int brake_img_y = (brake_y - (brake_size / 4));
 
-  bool brake_valid = false; //scene->brakeLights;
+  bool brake_valid = scene->brakeLights;
   float brake_img_alpha = brake_valid ? 1.0f : 0.15f;
   float brake_bg_alpha = brake_valid ? 0.3f : 0.1f;
   NVGcolor brake_bg = nvgRGBA(0, 0, 0, (255 * brake_bg_alpha));
@@ -670,7 +710,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
     char uom_str[6];
     NVGcolor val_color = COLOR_WHITE_ALPHA(200);
     if (scene->controls_state.getEnabled()) {
-      snprintf(val_str, sizeof(val_str), "%.2f",(0.0));
+      snprintf(val_str, sizeof(val_str), "%.2f",(s->scene.steerRatio));
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }
