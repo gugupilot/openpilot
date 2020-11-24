@@ -119,12 +119,12 @@ void update_sockets(UIState *s) {
   if (s->started && sm.updated("controlsState")) {
     auto event = sm["controlsState"];
     scene.controls_state = event.getControlsState();
-
+/*
     s->scene.angleSteers = scene.controls_state.getAngleSteers();
     s->scene.steerOverride= scene.controls_state.getSteerOverride();
     s->scene.output_scale = scene.controls_state.getLateralControlState().getPidState().getOutput();
     s->scene.angleSteersDes = scene.controls_state.getAngleSteersDes();
-
+*/
     // TODO: the alert stuff shouldn't be handled here
     auto alert_sound = scene.controls_state.getAlertSound();
     if (scene.alert_type.compare(scene.controls_state.getAlertType()) != 0) {
@@ -143,17 +143,13 @@ void update_sockets(UIState *s) {
       s->status = STATUS_WARNING;
     } else if (alertStatus == cereal::ControlsState::AlertStatus::CRITICAL) {
       s->status = STATUS_ALERT;
-/*
     } else if (scene.controls_state.getEnabled()){
       s->status = (s->longitudinal_control)? STATUS_ENGAGED_OPLONG:STATUS_ENGAGED;
     }
     else {
       s->status = STATUS_DISENGAGED;
     }
-*/
-    } else{
-      s->status = scene.controls_state.getEnabled() ? STATUS_ENGAGED : STATUS_DISENGAGED;
-    }
+
 
     float alert_blinkingrate = scene.controls_state.getAlertBlinkingRate();
     if (alert_blinkingrate > 0.) {
