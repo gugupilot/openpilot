@@ -100,8 +100,9 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     deviceFalling @90;
     fanMalfunction @91;
     cameraMalfunction @92;
-    visiononlyWarning @ 93;
-    belowSteerSpeedDing @ 94;
+    modelLagWarning @93;
+    visiononlyWarning @ 94;
+    belowSteerSpeedDing @ 95;
 
     gasUnavailableDEPRECATED @3;
     dataNeededDEPRECATED @16;
