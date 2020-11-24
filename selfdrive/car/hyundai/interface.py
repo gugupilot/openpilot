@@ -17,6 +17,7 @@ class CarInterface(CarInterfaceBase):
     self.cp2 = self.CS.get_can2_parser(CP)
     self.visiononlyWarning = False
     self.belowspeeddingtimer = 0.
+    self.enabled_prev = False
 
   @staticmethod
   def compute_gb(accel, speed):
@@ -261,6 +262,10 @@ class CarInterface(CarInterfaceBase):
 
     if self.CP.sccBus == 2:
       self.CP.enableCruise = self.CC.usestockscc
+
+    if self.enabled_prev and not self.CC.enabled and not self.CP.enableCruise:
+      ret.cruiseState.enabled = False
+    self.enabled_prev = self.CC.enabled
 
     if self.CS.brakeHold and not self.CC.usestockscc:
       events.add(EventName.brakeHold)
