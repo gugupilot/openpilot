@@ -76,6 +76,7 @@ Spinner::Spinner(QWidget *parent) {
 
 void Spinner::rotate() {
   transform.rotate(5);
+
   QPixmap r = track_img.transformed(transform.rotate(5), Qt::SmoothTransformation);
   int x = (r.width() - track->width()) / 2;
   int y = (r.height() - track->height()) / 2;
