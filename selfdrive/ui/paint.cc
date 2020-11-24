@@ -119,7 +119,6 @@ static void draw_lead(UIState *s, const cereal::RadarState::LeadData::Reader &le
   float leadBuff = 40.;
   float d_rel = lead.getDRel();
   float v_rel = lead.getVRel();
-  float y_rel = lead.getYRel();
   if (d_rel < leadBuff) {
     fillAlpha = 255*(1.0-(d_rel/leadBuff));
     if (v_rel < 0) {
@@ -127,12 +126,7 @@ static void draw_lead(UIState *s, const cereal::RadarState::LeadData::Reader &le
     }
     fillAlpha = (int)(fmin(fillAlpha, 255));
   }
-  if (s->longitudinal_control) {
-    draw_chevron(s, d_rel + 3, y_rel, 25, nvgRGBA(201, 34, 49, fillAlpha), COLOR_YELLOW);
-  }
-  else {
-    draw_chevron(s, d_rel + 3, y_rel, 25, nvgRGBA(165, 255, 135, fillAlpha), COLOR_GREEN);
-  }
+  draw_chevron(s, d_rel, lead.getYRel(), 25, nvgRGBA(201, 34, 49, fillAlpha), COLOR_YELLOW);
 }
 
 static void ui_draw_line(UIState *s, const vertex_data *v, const int cnt, NVGcolor *color, NVGpaint *paint) {
@@ -281,11 +275,13 @@ static void ui_draw_world(UIState *s) {
   ui_draw_vision_lane_lines(s);
 
   // Draw lead indicators if openpilot is handling longitudinal
+  if (s->longitudinal_control) {
     if (scene->lead_data[0].getStatus()) {
       draw_lead(s, scene->lead_data[0]);
     }
-    if (scene->lead_data[1].getStatus() && (std::abs(scene->lead_data[0].getDRel() - scene->lead_data[1].getDRel()) > 1.0)) {
+    if (scene->lead_data[1].getStatus() && (std::abs(scene->lead_data[0].getDRel() - scene->lead_data[1].getDRel()) > 3.0)) {
       draw_lead(s, scene->lead_data[1]);
+    }
   }
   nvgRestore(s->vg);
 }
@@ -426,35 +422,6 @@ static void ui_draw_driver_view(UIState *s) {
   ui_draw_circle_image(s->vg, x, y, face_size, s->img_face, scene->dmonitoring_state.getFaceDetected());
 }
 
-static void ui_draw_vision_brake(UIState *s) {
-  const UIScene *scene = &s->scene;
-  const Rect &viz_rect = s->scene.viz_rect;
-  const int brake_size = 96;
-  const int brake_x = (viz_rect.x + (brake_size * 3) + (bdr_s * 4));
-  const int brake_y = (footer_y + ((footer_h - brake_size) / 2));
-  const int brake_img_size = (brake_size * 1.5);
-  const int brake_img_x = (brake_x - (brake_img_size / 2));
-  const int brake_img_y = (brake_y - (brake_size / 4));
-
-  bool brake_valid = scene->brakeLights;
-  float brake_img_alpha = brake_valid ? 1.0f : 0.15f;
-  float brake_bg_alpha = brake_valid ? 0.3f : 0.1f;
-  NVGcolor brake_bg = nvgRGBA(0, 0, 0, (255 * brake_bg_alpha));
-  NVGpaint brake_img = nvgImagePattern(s->vg, brake_img_x, brake_img_y,
-                                       brake_img_size, brake_img_size, 0,
-                                       s->img_brake, brake_img_alpha);
-
-  nvgBeginPath(s->vg);
-  nvgCircle(s->vg, brake_x, (brake_y + (bdr_s * 1.5)), brake_size);
-  nvgFillColor(s->vg, brake_bg);
-  nvgFill(s->vg);
-
-  nvgBeginPath(s->vg);
-  nvgRect(s->vg, brake_img_x, brake_img_y, brake_img_size, brake_img_size);
-  nvgFillPaint(s->vg, brake_img);
-  nvgFill(s->vg);
-}
-
 static void ui_draw_vision_header(UIState *s) {
   const Rect &viz_rect = s->scene.viz_rect;
   NVGpaint gradient = nvgLinearGradient(s->vg, viz_rect.x,
@@ -471,7 +438,6 @@ static void ui_draw_vision_header(UIState *s) {
 
 static void ui_draw_vision_footer(UIState *s) {
   ui_draw_vision_face(s);
-  ui_draw_vision_brake(s);
 }
 
 void ui_draw_vision_alert(UIState *s, cereal::ControlsState::AlertSize va_size, UIStatus va_color,
@@ -677,8 +643,6 @@ void ui_nvg_init(UIState *s) {
   assert(s->img_turn != 0);
   s->img_face = nvgCreateImage(s->vg, "../assets/img_driver_face.png", 1);
   assert(s->img_face != 0);
-  s->img_brake = nvgCreateImage(s->vg, "../assets/img_brake_disc.png", 1);
-  assert(s->img_brake >= 0);
   s->img_button_settings = nvgCreateImage(s->vg, "../assets/images/button_settings.png", 1);
   assert(s->img_button_settings != 0);
   s->img_button_home = nvgCreateImage(s->vg, "../assets/images/button_home.png", 1);
